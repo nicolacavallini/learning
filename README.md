@@ -15,4 +15,4 @@
 
  - [Check if directory exists](https://10.0.1.60/ncavallini/learning/blob/master/cpp/exist_dir.cpp)
 
- - [Find String](https://10.0.1.60/ncavallini/learning/blob/master/cpp/string_find.c)
+ - [Find String](https://10.0.1.60/ncavallini/learning/blob/master/cpp/string_find.c )

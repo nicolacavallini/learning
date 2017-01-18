@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+project( glcm_setup )
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+add_executable( glcm_setup glcm_setup.cpp )
+target_link_libraries( glcm_setup ${OpenCV_LIBS} )

@@ -6,18 +6,20 @@
 using namespace std;
 using namespace cv;
 
-Mat_<uint8_t> gery_co_matrix(const Mat_<uint8_t> &image,
+
+template<class T>
+Mat_<T> gery_co_matrix(const Mat_<T> &image,
                     const double &distance,
                     const double &angle,
-                    const uint8_t &levels)
+                    const T &levels)
 {
-    Mat_<uint8_t> output = Mat_<uint8_t>::zeros(image.rows,
+    Mat_<T> output = Mat_<T>::zeros(image.rows,
                             image.cols);
 
     for (int r = 0; r< image.rows; r++){
         for (int c =0; c < image.cols; c++){
 
-            uint8_t i = image.at<uint8_t>(r,c);
+            T i = image(r,c);
 
             int d_row = r + (int)round(sin(angle)*distance);
             int d_col = c + (int)round(cos(angle)*distance);
@@ -25,12 +27,12 @@ Mat_<uint8_t> gery_co_matrix(const Mat_<uint8_t> &image,
             if (d_row >= 0 && d_row < image.rows &&
                 d_col >= 0 && d_col < image.cols ){
 
-                uint8_t j = image.at<uint8_t>(d_row,d_col);
+                T j = image(d_row,d_col);
 
                 if (i >= 0 && i < levels &&
                     j >= 0 && j < levels){
 
-                    output.at<uint8_t>(i,j)+=1;
+                    output(i,j)+=1;
                 }
             }
         }
@@ -57,7 +59,12 @@ int main(){
     cout << "test_image.rows = " << test_image.rows << endl;
     cout << "test_image.cols = " << test_image.cols << endl;
 
-    Mat_<uint8_t> glcm = gery_co_matrix(test_image,distance,angle,levels);
+    Mat_<uint8_t> glcm0 = gery_co_matrix(test_image,distance,angle,levels);
+    cout << "output = " << endl << glcm0 << endl;
 
-    cout << "output = " << endl << glcm << endl;
+    Mat_<uint16_t> glcm1 = gery_co_matrix(test_image,distance,angle,levels);
+    cout << "output = " << endl << glcm1 << endl;
+
+    Mat_<int16_t> glcm2 = gery_co_matrix(test_image,distance,angle,levels);
+    cout << "output = " << endl << glcm2 << endl;
 }

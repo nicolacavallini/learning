@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 project( glcm_setup )
+set (CMAKE_CXX_FLAGS "--std=gnu++11 ${CMAKE_CXX_FLAGS}")
 find_package( OpenCV REQUIRED )
+find_package(Boost REQUIRED)
 include_directories( ${OpenCV_INCLUDE_DIRS} )
+include_directories(${Boost_INCLUDE_DIRS})
+
 add_executable( glcm_setup glcm_setup.cpp )
 target_link_libraries( glcm_setup ${OpenCV_LIBS} )
+target_link_libraries( glcm_setup ${Boost_LIBRARIES})

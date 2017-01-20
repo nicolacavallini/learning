@@ -5,6 +5,11 @@
 
 #include <iostream>
 
+#include <math.h>
+
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
+
 using namespace std;
 using namespace cv;
 
@@ -17,18 +22,8 @@ Mat_<T> gery_co_matrix(const Mat_<T> &image,
     Mat_<T> output = Mat_<T>::zeros(image.rows,
                             image.cols);
 
-    double dr = round(sin(angle)*distance);
-    double dc = round(cos(angle)*distance);
-
-    cout << "dr = " << dr << endl;
-    cout << "dc = " << dc << endl;
-
-    int delta_r = (int)dr;
-    int delta_c = (int)dc;
-
-    cout << "delta_r = " << delta_r << endl;
-    cout << "delta_c = " << delta_c << endl;
-
+    int delta_r = (int)round(sin(angle)*distance);
+    int delta_c = (int)round(cos(angle)*distance);
 
     for (int r = 0; r< image.rows; r++){
         for (int c =0; c < image.cols; c++){
@@ -55,6 +50,82 @@ Mat_<T> gery_co_matrix(const Mat_<T> &image,
     return output;
 }
 
+template<class T>
+void explore_matrix(const Mat_<T> &image)
+{
+    int count= 0;
+    auto it = image.begin();
+    for (; it != image.end() ; ++it)
+    {
+        int i = floor ((double)count / (double)image.cols);
+        int j = count - image.cols*i;
+        cout << "count = " << count;
+        cout << ", i = " << i;
+        cout << ", j = " << j;
+        cout << ", element = " << *it << endl;
+        count++;
+    }
+
+}
+
+template<class T>
+double evaluate_energy(const Mat_<T> &image)
+{
+    double energy = 0;
+
+    auto it = image.begin();
+    for (; it != image.end() ; ++it)
+        energy+= (double)*it * (double)*it;
+
+    return sqrt(energy);
+}
+
+template<class T>
+double evaluate_entropy(const Mat_<T> &image)
+{
+    double entropy = 0;
+
+    auto it = image.begin();
+    for (; it != image.end() ; ++it)
+        entropy+= (double)*it * log2((double)*it);
+
+    return -1.*entropy;
+}
+
+template<class T>
+Mat_<double> normalise_co_matrix(const Mat_<T> &image)
+{
+    double acc = 0;
+    auto it = image.begin();
+    for (; it != image.end() ; ++it)
+        acc+= (double)*it;
+
+    Mat_<double> n(image.rows,image.cols);
+
+    int count = 0;
+
+    it = image.begin();
+    for (; it != image.end() ; ++it){
+        int i = floor ((double)count / (double)image.cols);
+        int j = count - image.cols*i;
+        n(i,j) = (double)*it/acc;
+        count++;
+    }
+    return n;
+}
+
+template<class T>
+Mat_<T> simmetrise_co_matrix( Mat_<T> &image)
+{
+    Mat_<T> n = image.clone();
+
+    for (int i = 0; i<image.rows; i++)
+        for (int j = 0; j<image.cols; j++)
+            n(i,j)+=image(j,i);
+
+    return n;
+}
+
 template<class input_format, class output_format>
 void print_matrix(Mat_<input_format> &P)
 {
@@ -71,7 +142,6 @@ void print_matrix(Mat_<input_format> &P)
                 break;
             else
                 cout << ", ";
-
         }
     }
     cout << "]" << endl;

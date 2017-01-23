@@ -19,22 +19,22 @@ Mat_<T> gery_co_matrix(const Mat_<T> &image,
                     const double &angle,
                     const T &levels)
 {
-    Mat_<T> output = Mat_<T>::zeros(image.rows,
-                            image.cols);
+    Mat_<T> output = Mat_<T>::zeros(levels,
+                            levels);
 
     int delta_r = (int)round(sin(angle)*distance);
     int delta_c = (int)round(cos(angle)*distance);
 
-    for (int r = 0; r< image.rows; r++){
-        for (int c =0; c < image.cols; c++){
+    for (int r = 0; r< levels; r++){
+        for (int c =0; c < levels; c++){
 
             T i = image(r,c);
 
             int d_row = r + delta_r;
             int d_col = c + delta_c;
 
-            if (d_row >= 0 && d_row < image.rows &&
-                d_col >= 0 && d_col < image.cols ){
+            if (d_row >= 0 && d_row < levels &&
+                d_col >= 0 && d_col < levels ){
 
                 T j = image(d_row,d_col);
 

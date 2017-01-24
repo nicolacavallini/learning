@@ -43,3 +43,9 @@ if __name__== "__main__":
     print "homogeneity", greycoprops(result, 'homogeneity')
 
     print "ASM", greycoprops(result, 'ASM')
+
+    vec = np.array([[1, 2, 3, 4]])
+
+    print "vector std dev = ", np.std(vec)
+
+    print "vector std mean = ", np.mean(vec)

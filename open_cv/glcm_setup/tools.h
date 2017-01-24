@@ -65,7 +65,6 @@ void explore_matrix(const Mat_<T> &image)
         cout << ", element = " << *it << endl;
         count++;
     }
-
 }
 
 template<class T>
@@ -79,6 +78,73 @@ double evaluate_energy(const Mat_<T> &image)
 
     return sqrt(energy);
 }
+
+template<class T>
+double evaluate_contrast(const Mat_<T> &image)
+{
+    double entropy = 0;
+
+    int count= 0;
+    auto it = image.begin();
+    for (; it != image.end() ; ++it)
+    {
+        int i = floor ((double)count / (double)image.cols);
+        int j = count - image.cols*i;
+        //cout << "count = " << count;
+        //cout << ", i = " << i;
+        //cout << ", j = " << j;
+        //cout << ", element = " << *it;
+        //cout << ", pow((i-j),2) = " << pow((i-j),2) << endl;
+        entropy += pow((i-j),2)* (double)*it;
+        count++;
+    }
+    return entropy;
+}
+
+template<class T>
+double evaluate_homogeneity(const Mat_<T> &image)
+{
+    double entropy = 0;
+
+    int count= 0;
+    auto it = image.begin();
+    for (; it != image.end() ; ++it)
+    {
+        int i = floor ((double)count / (double)image.cols);
+        int j = count - image.cols*i;
+        //cout << "count = " << count;
+        //cout << ", i = " << i;
+        //cout << ", j = " << j;
+        //cout << ", element = " << *it;
+        //cout << ", pow((i-j),2) = " << pow((i-j),2) << endl;
+        entropy += 1./(pow((i-j),2)+1)* (double)*it;
+        count++;
+    }
+    return entropy;
+}
+
+template<class T>
+double evaluate_dissimilarity(const Mat_<T> &image)
+{
+    double entropy = 0;
+
+    int count= 0;
+    auto it = image.begin();
+    for (; it != image.end() ; ++it)
+    {
+        int i = floor ((double)count / (double)image.cols);
+        int j = count - image.cols*i;
+        //cout << "count = " << count;
+        //cout << ", i = " << i;
+        //cout << ", j = " << j;
+        //cout << ", element = " << *it;
+        //cout << ", pow((i-j),2) = " << pow((i-j),2) << endl;
+        entropy += abs(i-j)* (double)*it;
+        count++;
+    }
+    return entropy;
+}
+
 
 template<class T>
 double evaluate_entropy(const Mat_<T> &image)
@@ -129,6 +195,7 @@ Mat_<T> simmetrise_co_matrix( Mat_<T> &image)
 template<class input_format, class output_format>
 void print_matrix(Mat_<input_format> &P)
 {
+    std::cout.precision(15);
     cout << "[";
     for (int i =0; i < P.rows; i++)
     {

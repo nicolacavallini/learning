@@ -21,14 +21,8 @@ if __name__== "__main__":
 
     result = greycomatrix(image, ray, theta, levels=4)
 
-    print "energy not normed", greycoprops(result, 'energy')
-
-
     result_n = greycomatrix(image, ray, theta, levels=4,\
                             symmetric=False, normed=True)
-
-    print "energy normed", greycoprops(result_n, 'energy')
-
 
     print("ray = ", ray)
     kont = 0
@@ -37,3 +31,15 @@ if __name__== "__main__":
         print result[:, :, 0, kont]
         print result_n[:, :, 0, kont]
         kont+=1
+
+    print "energy not normed", greycoprops(result, 'energy')
+
+    print "energy normed", greycoprops(result_n, 'energy')
+
+    print "contrast", greycoprops(result, 'contrast')
+
+    print "dissimilarity", greycoprops(result, 'dissimilarity')
+
+    print "homogeneity", greycoprops(result, 'homogeneity')
+
+    print "ASM", greycoprops(result, 'ASM')

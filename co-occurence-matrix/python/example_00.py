@@ -5,7 +5,79 @@ http://scikit-image.org/docs/dev/api/skimage.feature.html?highlight=greycomatrix
 """
 import numpy as np
 from skimage.feature import greycomatrix
-from skimage.feature import greycoprops
+
+def greycoprops(P, prop='contrast'):
+
+    (num_level, num_level2, num_dist, num_angle) = P.shape
+    assert num_level == num_level2
+    assert num_dist > 0
+    assert num_angle > 0
+
+    # create weights for specified property
+    I, J = np.ogrid[0:num_level, 0:num_level]
+
+    print I
+    print J
+
+    if prop == 'contrast':
+        weights = (I - J) ** 2
+    elif prop == 'dissimilarity':
+        weights = np.abs(I - J)
+    elif prop == 'homogeneity':
+        weights = 1. / (1. + (I - J) ** 2)
+    elif prop in ['ASM', 'energy', 'correlation']:
+        pass
+    else:
+        raise ValueError('%s is an invalid property' % (prop))
+
+    # compute property for each GLCM
+    if prop == 'energy':
+        asm = np.apply_over_axes(np.sum, (P ** 2), axes=(0, 1))[0, 0]
+        results = np.sqrt(asm)
+    elif prop == 'ASM':
+        results = np.apply_over_axes(np.sum, (P ** 2), axes=(0, 1))[0, 0]
+    elif prop == 'correlation':
+        print "================================================================"
+        results = np.zeros((num_dist, num_angle), dtype=np.float64)
+        I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
+        J = np.array(range(num_level)).reshape((1, num_level, 1, 1))
+
+        #print I
+
+        diff_i = I - np.apply_over_axes(np.sum, (I * P), axes=(0, 1))[0, 0]
+        diff_j = J - np.apply_over_axes(np.sum, (J * P), axes=(0, 1))[0, 0]
+
+        #print diff_i
+        #print diff_j
+
+        std_i = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_i) ** 2),
+                                           axes=(0, 1))[0, 0])
+        std_j = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_j) ** 2),
+                                           axes=(0, 1))[0, 0])
+        cov = np.apply_over_axes(np.sum, (P * (diff_i * diff_j)),
+                                 axes=(0, 1))[0, 0]
+
+        # handle the special case of standard deviations near zero
+        mask_0 = std_i < 1e-15
+        print std_i 
+        print mask_0
+
+        mask_0[std_j < 1e-15] = True
+        results[mask_0] = 1
+
+        print results
+
+        # handle the standard case
+        mask_1 = mask_0 == False
+        results[mask_1] = cov[mask_1] / (std_i[mask_1] * std_j[mask_1])
+        print "================================================================"
+    elif prop in ['contrast', 'dissimilarity', 'homogeneity']:
+        weights = weights.reshape((num_level, num_level, 1, 1))
+        results = np.apply_over_axes(np.sum, (P * weights), axes=(0, 1))[0, 0]
+
+    return results
+
+
 
 if __name__== "__main__":
 
@@ -44,7 +116,9 @@ if __name__== "__main__":
 
     print "ASM", greycoprops(result, 'ASM')
 
-    vec = np.array([[1, 2, 3, 4]])
+    print "correlation", greycoprops(result, 'correlation')
+
+    vec = np.array([13, 14, 15, 16])
 
     print "vector std dev = ", np.std(vec)
 

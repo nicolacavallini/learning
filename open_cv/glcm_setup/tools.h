@@ -13,6 +13,13 @@
 using namespace std;
 using namespace cv;
 
+
+/*double sum = std::accumulate(v.begin(), v.end(), 0.0);
+double mean = sum / v.size();
+
+double sq_sum = std::inner_product(v.begin(), v.end(), v.begin(), 0.0);
+double stdev = std::sqrt(sq_sum / v.size() - mean * mean);*/
+
 template<class T>
 Mat_<T> gery_co_matrix(const Mat_<T> &image,
                     const double &distance,
@@ -66,6 +73,11 @@ void explore_matrix(const Mat_<T> &image)
         count++;
     }
 }
+
+/*double wheight_energy()
+{
+    return 1.;
+}*/
 
 template<class T>
 double evaluate_energy(const Mat_<T> &image)
@@ -145,6 +157,121 @@ double evaluate_dissimilarity(const Mat_<T> &image)
     return entropy;
 }
 
+double weight_correlation(int &i, int &j,
+                          vector<double> &mean_i,
+                          vector<double> &std_i,
+                          vector<double> &mean_j,
+                          vector<double> &std_j)
+{
+    //cout << "mean_i["<< i  << "] = "
+    //     << mean_i[i] << endl;
+
+    //cout << "j = " << j << "/" <<
+    //        mean_j.size() << endl;
+    //cout << "mean_j["<< j  << "] = "
+    //     << mean_j[j] << endl;
+    double num = ((double)i - mean_i[i]) *
+                 ((double)j - mean_j[j]);
+
+    double den = std_i[i]* std_j[j];
+
+    cout << "num = " << num <<
+            ", den = " << den << endl;
+
+    return num/den;
+}
+
+template<class T>
+double evaluate_glcm_mean(Mat_<T> &image, int &i)
+{
+    double entropy = 0;
+
+    auto it = image.begin();
+    for (; it != image.end() ; ++it)
+        entropy += (double)i * (double)*it;
+
+    return entropy;
+}
+
+template<class T>
+double evaluate_glcm_stdv(Mat_<T> &image, int &i)
+{
+
+    double mu_i = evaluate_glcm_mean(image,i);
+
+    double entropy = 0;
+
+    auto it = image.begin();
+    for (; it != image.end() ; ++it)
+        entropy += pow((double)i-mu_i,2) * (double)*it;
+
+    return entropy;
+}
+
+template<class  T>
+double evaluate_correlation(const Mat_<T> &image)
+{
+    vector<double> mean_i;
+    vector<double> std_i;
+
+    vector<double> mean_j;
+    vector<double> std_j;
+
+    cout << image <<endl;
+
+    for (int i=0; i <  image.rows; i ++){
+
+        Mat_<T> row = image.row(i);
+
+        mean_i.push_back(
+                    evaluate_glcm_mean(row,i));
+
+        std_i.push_back(evaluate_glcm_stdv(row,i));
+    }
+
+    for (int j=0; j <  image.cols; j ++){
+
+        Mat_<T> col = image.col(j);
+
+        mean_j.push_back(
+                    evaluate_glcm_mean(col,j));
+
+        std_j.push_back(evaluate_glcm_stdv(col,j));
+    }
+
+    /* This has to become a function */
+    /* if correlation call the function */
+    vector<vector<bool>> mask;
+
+    auto ir = std_i.begin();
+    for (; ir != std_i.end(); ++ir){
+        auto ic = std_j.begin();
+        for (; ic != std_j.end(); ++ic){
+            cout << *ir << ", " << *ic << endl;
+            vector<bool> row;
+            row.push_back(*ir < 1e-15 || *ic < 1e-15);
+        }
+        mask.push_back(row);
+    }
+
+
+
+    double entropy = 0;
+
+    int count= 0;
+    auto it = image.begin();
+    for (; it != image.end() ; ++it)
+    {
+        int i = floor ((double)count / (double)image.cols);
+        int j = count - image.cols*i;
+        entropy += weight_correlation(i,j,
+                                      mean_i,std_i,
+                                      mean_j,std_j)
+                * (double)*it;
+        count++;
+    }
+    return entropy;
+}
 
 template<class T>
 double evaluate_entropy(const Mat_<T> &image)

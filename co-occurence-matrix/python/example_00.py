@@ -42,6 +42,24 @@ def greycoprops(P, prop='contrast'):
         I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
         J = np.array(range(num_level)).reshape((1, num_level, 1, 1))
 
+        print I.shape
+        print I[:,:,0,0]
+        print J.shape
+        print J[:,:0,0]
+        print P.shape
+        print P[:,:,0,0]
+        print "----------------------------------------------------------------"
+        Z = I*P
+        print Z.shape
+        print Z[:,:,0,0]
+        c = np.apply_over_axes(np.sum, (I * P), axes=(0, 1))
+        print c.shape
+        print "----------------------------------------------------------------"
+        Z = J*P
+        print Z.shape
+        print Z[:,:,0,0]
+        print "----------------------------------------------------------------"
+
         #print I
 
         diff_i = I - np.apply_over_axes(np.sum, (I * P), axes=(0, 1))[0, 0]
@@ -59,7 +77,7 @@ def greycoprops(P, prop='contrast'):
 
         # handle the special case of standard deviations near zero
         mask_0 = std_i < 1e-15
-        print std_i 
+        print std_i
         print mask_0
 
         mask_0[std_j < 1e-15] = True

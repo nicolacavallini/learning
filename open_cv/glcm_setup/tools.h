@@ -203,16 +203,15 @@ double evaluate_glcm_stdv(Mat_<T> &image, int &i)
 
     auto it = image.begin();
     for (; it != image.end() ; ++it)
-        entropy += pow((double)i-mu_i,2) * (double)*it;
+        entropy += pow((double)i-mu_i,2) *
+                   pow((double)*it,2);
 
-    return entropy;
+    return sqrt(entropy);
 }
 
 vector<vector<bool>> mask_zero_std(vector<double> &std_i ,
                                    vector<double> &std_j)
 {
-    /* This has to become a function */
-    /* if correlation call the function */
     vector<vector<bool>> mask;
 
     auto ir = std_i.begin();
@@ -232,6 +231,13 @@ vector<vector<bool>> mask_zero_std(vector<double> &std_i ,
     return mask;
 }
 
+template<class T>
+double sum_ij(const Mat_<T> &image)
+{
+    return (double)accumulate(image.begin(),
+                              image.end(), 0.0);
+}
+
 template<class  T>
 double evaluate_correlation(const Mat_<T> &image)
 {
@@ -249,7 +255,6 @@ double evaluate_correlation(const Mat_<T> &image)
 
         mean_i.push_back(
                     evaluate_glcm_mean(row,i));
-
         std_i.push_back(evaluate_glcm_stdv(row,i));
     }
 
@@ -259,11 +264,10 @@ double evaluate_correlation(const Mat_<T> &image)
 
         mean_j.push_back(
                     evaluate_glcm_mean(col,j));
-
         std_j.push_back(evaluate_glcm_stdv(col,j));
     }
 
-
+    vector<vector<bool>> mask = mask_zero_std(std_i,std_j);
 
     double entropy = 0;
 
@@ -273,10 +277,16 @@ double evaluate_correlation(const Mat_<T> &image)
     {
         int i = floor ((double)count / (double)image.cols);
         int j = count - image.cols*i;
-        entropy += weight_correlation(i,j,
-                                      mean_i,std_i,
-                                      mean_j,std_j)
-                * (double)*it;
+
+        if (mask[i][j])
+            entropy += weight_correlation(i,j,
+                                          mean_i,std_i,
+                                          mean_j,std_j)
+                    * (double)*it;
+        else
+            entropy += (double)*it;
+
+
         count++;
     }
     return entropy;

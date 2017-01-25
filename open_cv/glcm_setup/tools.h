@@ -208,6 +208,30 @@ double evaluate_glcm_stdv(Mat_<T> &image, int &i)
     return entropy;
 }
 
+vector<vector<bool>> mask_zero_std(vector<double> &std_i ,
+                                   vector<double> &std_j)
+{
+    /* This has to become a function */
+    /* if correlation call the function */
+    vector<vector<bool>> mask;
+
+    auto ir = std_i.begin();
+    for (; ir != std_i.end(); ++ir){
+        auto ic = std_j.begin();
+
+        vector<bool> row;
+        for (; ic != std_j.end(); ++ic){
+            cout << *ir << ", " << *ic << endl;
+            if(*ir < 1e-15 || *ic < 1e-15)
+                row.push_back(false);
+            else
+                row.push_back(true);
+        }
+        mask.push_back(row);
+    }
+    return mask;
+}
+
 template<class  T>
 double evaluate_correlation(const Mat_<T> &image)
 {
@@ -237,21 +261,6 @@ double evaluate_correlation(const Mat_<T> &image)
                     evaluate_glcm_mean(col,j));
 
         std_j.push_back(evaluate_glcm_stdv(col,j));
-    }
-
-    /* This has to become a function */
-    /* if correlation call the function */
-    vector<vector<bool>> mask;
-
-    auto ir = std_i.begin();
-    for (; ir != std_i.end(); ++ir){
-        auto ic = std_j.begin();
-        for (; ic != std_j.end(); ++ic){
-            cout << *ir << ", " << *ic << endl;
-            vector<bool> row;
-            row.push_back(*ir < 1e-15 || *ic < 1e-15);
-        }
-        mask.push_back(row);
     }
 
 

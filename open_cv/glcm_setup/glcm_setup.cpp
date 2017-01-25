@@ -50,6 +50,58 @@ TEST(TestGLCM, mean_std_deviation)
     //EXPECT_NEAR(4.47213595499958,evaluate_stdv(col_j),1E-10);
 }
 
+void print_mask(vector<vector<bool>> &mask,
+                bool print_alpha=true)
+{
+    auto ir = mask.begin();
+    for (; ir != mask.end(); ++ir){
+        auto ic = ir->begin();
+        for (; ic != ir->end(); ++ic){
+            if (print_alpha)
+                cout << boolalpha;
+            cout << *ic << ", ";
+        }
+        cout << endl;
+    }
+}
+
+template<class T>
+void compare_vec_of_vec(const vector<vector<T>> &mask1,
+                        const vector<vector<T>> &mask2){
+    //TODO assetion on dimensions
+    auto ir1 = mask1.begin();
+    auto ir2 = mask2.begin();
+    for (; ir1!=mask1.end();++ir1, ++ir2){
+        auto ic1 = ir1->begin();
+        auto ic2 = ir2->begin();
+        for (; ic1 != ir1->end(); ++ic1, ++ic2)
+            EXPECT_EQ(*ic1,*ic2);
+    }
+}
+
+TEST(TestGLCM, mask)
+{
+    vector<double> std_i = {2.2, 4.1, 5., 0, 6.3};
+    vector<double> std_j = {2.3, 5.3, 0, 3.1, 9.3};
+
+
+    vector<vector<bool>> mask = mask_zero_std(std_i,std_j);
+
+    vector<vector<bool>> mask_ex = {
+        {true, true, false, true, true},
+        {true, true, false, true, true},
+        {true, true, false, true, true},
+        {false, false, false, false, false},
+        {true, true, false, true, true}};
+
+    compare_vec_of_vec(mask,mask_ex);
+    //EXPECT_DOUBLE_EQ(10, evaluate_mean(col_j));
+
+    //EXPECT_NEAR(1.11803398874989,evaluate_stdv(row_i),1E-10);
+
+    //EXPECT_NEAR(4.47213595499958,evaluate_stdv(col_j),1E-10);
+}
+
 
 TEST(TestGLCM, test_glcm)
 {

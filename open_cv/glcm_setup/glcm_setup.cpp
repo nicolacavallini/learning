@@ -15,6 +15,8 @@ template<class T>
 void compare_matrices_int(const T &a,
                       const T &b)
 {
+    EXPECT_EQ(a.rows,b.rows);
+    EXPECT_EQ(a.cols,b.cols);
     auto ia = a.begin();
     auto ib = b.begin();
     for (; ia != a.end() ; ++ia, ++ib)
@@ -25,11 +27,45 @@ template<class T>
 void compare_matrices_double(const T &a,
                       const T &b)
 {
+    EXPECT_EQ(a.rows,b.rows);
+    EXPECT_EQ(a.cols,b.cols);
     auto ia = a.begin();
     auto ib = b.begin();
     for (; ia != a.end() ; ++ia, ++ib)
         EXPECT_NEAR(*ia,*ib,1E-10);
 }
+
+TEST(TestGLCM, basic_tools)
+{
+    Mat_<uint16_t> col = create_i_long_column<uint16_t>(5);
+
+    Mat_<uint16_t> ex_col = (Mat_<uint16_t>(5,1) <<
+                             0, 1, 2, 3, 4);
+    compare_matrices_int(col,ex_col);
+
+    Mat_<uint16_t> row = create_j_long_row<uint16_t>(5);
+
+    Mat_<uint16_t> ex_row = (Mat_<uint16_t>(1,5) <<
+                             0, 1, 2, 3, 4);
+    compare_matrices_int(row,ex_row);
+
+    uint16_t s = scalar_prod(row,col);
+
+    EXPECT_EQ(s,30);
+
+    Mat_<uint16_t> mm = mat_mat_mult(col,row);
+
+    Mat_<uint16_t> mm_ex = (Mat_<uint16_t>(5,5) <<
+                             0, 0, 0, 0, 0,
+                             0, 1, 2, 3, 4,
+                             0, 2, 4, 6, 8,
+                             0, 3, 6, 9, 12,
+                             0, 4, 8, 12, 16);
+
+    compare_matrices_int(mm,mm_ex);
+}
+
+
 
 TEST(TestGLCM, mean_std_deviation)
 {

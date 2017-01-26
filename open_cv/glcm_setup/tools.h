@@ -10,6 +10,8 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
+#include "./assert.h"
+
 using namespace std;
 using namespace cv;
 
@@ -19,6 +21,83 @@ double mean = sum / v.size();
 
 double sq_sum = std::inner_product(v.begin(), v.end(), v.begin(), 0.0);
 double stdev = std::sqrt(sq_sum / v.size() - mean * mean);*/
+
+template<class T>
+Mat_<T> create_i_long_column(int l)
+{
+    Mat_<T> i_column(l,1);
+
+    for (int i =0; i<l; i++)
+        i_column(i,0) = (T)i;
+
+    return i_column;
+}
+
+template<class T>
+Mat_<T> create_j_long_row(int l)
+{
+    Mat_<T> j_row(1,l);
+
+    for (int j =0; j<l; j++)
+        j_row(0,j) = (T)j;
+
+    return j_row;
+}
+
+template<class T>
+T scalar_prod(Mat_<T> &row, Mat_<T> &col)
+{
+    ASSERT(row.rows==1, "this is not a row, num cols!= 1");
+    ASSERT(col.cols==1, "this is not a column, num rows!= 1");
+    ASSERT(row.cols==col.rows, "first matrix cols, not equal second matrix rows");
+
+    T acc = 0;
+
+    auto ir = row.begin();
+    auto ic = col.begin();
+    for (; ir != row.end() ; ++ir, ++ic)
+        acc+= *ir * *ic;
+
+    return acc;
+}
+
+template<class T>
+Mat_<T> mat_mat_mult(Mat_<T> &row, Mat_<T> &col)
+{
+    ASSERT(row.cols==col.rows, "first matrix cols, not equal second matrix rows");
+
+    int i = row.rows;
+    int j = col.cols;
+
+    Mat_<T> result(i,j);
+
+    Mat_<T> z = Mat_<T>::zeros(i,j);
+
+    for (int id = 0; id < i ; id++){
+        Mat_<T> r = row.row(id);
+        for (int jd = 0; jd < j ; jd++){
+            Mat_<T> c = col.col(jd);
+            result(id,jd) = scalar_prod(r,c);
+        }
+    }
+    //gemm(col,row,1.,z,1.,result);
+    return result;
+}
+template<class T>
+Mat_<T> elem_elem_prod(Mat_<T> &row, Mat_<T> &col)
+{
+    ASSERT(row.rows==col.rows, "the two array dimensions have to be the same");
+    ASSERT(row.cols==col.cols, "the two array dimensions have to be the same");
+
+    T acc = 0;
+
+    auto ir = row.begin();
+    auto ic = col.begin();
+    for (; ir != row.end() ; ++ir, ++ic)
+        acc+= *ir * *ic;
+
+    return acc;
+}
 
 template<class T>
 Mat_<T> gery_co_matrix(const Mat_<T> &image,

@@ -400,10 +400,9 @@ double evaluate_correlation(Mat_<T> &image)
 
 
     T spi = sum_ij(pi);
-    cout << spi << endl;
     Mat_<T> diff_i = shif_by_scalar(i,spi);
+
     T spj = sum_ij(pj);
-    cout << spj << endl;
     Mat_<T> diff_j = shif_by_scalar(j,spj);
 
 

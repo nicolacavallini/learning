@@ -11,6 +11,8 @@
 using namespace std;
 using namespace cv;
 
+typedef int img_data;
+
 template<class T>
 void compare_matrices_int(const T &a,
                       const T &b)
@@ -37,25 +39,25 @@ void compare_matrices_double(const T &a,
 
 TEST(TestGLCM, basic_tools)
 {
-    Mat_<uint16_t> col = create_i_long_column<uint16_t>(5);
+    Mat_<img_data> col = create_i_long_column<img_data>(5);
 
-    Mat_<uint16_t> ex_col = (Mat_<uint16_t>(5,1) <<
+    Mat_<img_data> ex_col = (Mat_<img_data>(5,1) <<
                              0, 1, 2, 3, 4);
     compare_matrices_int(col,ex_col);
 
-    Mat_<uint16_t> row = create_j_long_row<uint16_t>(5);
+    Mat_<img_data> row = create_j_long_row<img_data>(5);
 
-    Mat_<uint16_t> ex_row = (Mat_<uint16_t>(1,5) <<
+    Mat_<img_data> ex_row = (Mat_<img_data>(1,5) <<
                              0, 1, 2, 3, 4);
     compare_matrices_int(row,ex_row);
 
-    uint16_t s = scalar_prod(row,col);
+    img_data s = scalar_prod(row,col);
 
     EXPECT_EQ(s,30);
 
-    Mat_<uint16_t> mm = mat_mat_mult(col,row);
+    Mat_<img_data> mm = mat_mat_mult(col,row);
 
-    Mat_<uint16_t> mm_ex = (Mat_<uint16_t>(5,5) <<
+    Mat_<img_data> mm_ex = (Mat_<img_data>(5,5) <<
                              0, 0, 0, 0, 0,
                              0, 1, 2, 3, 4,
                              0, 2, 4, 6, 8,
@@ -64,31 +66,59 @@ TEST(TestGLCM, basic_tools)
 
     compare_matrices_int(mm,mm_ex);
 
-    Mat_<uint16_t> uno = Mat_<uint16_t>::ones(5,5);
+    Mat_<img_data> uno = Mat_<img_data>::ones(5,5);
 
-    Mat_<uint16_t> el_el_prod = elem_elem_prod(uno,mm);
+    Mat_<img_data> el_el_prod = elem_elem_prod(uno,mm);
 
     compare_matrices_int(mm_ex,el_el_prod);
 
-    Mat_<uint16_t> shifted = shif_by_scalar<uint16_t>(uno,1);
+    Mat_<img_data> shifted = shif_by_scalar<img_data>(uno,1);
 
-    Mat_<uint16_t> zero = Mat_<uint16_t>::zeros(5,5);
+    Mat_<img_data> zero = Mat_<img_data>::zeros(5,5);
 
     compare_matrices_int(shifted,zero);
+
+    Mat_<img_data> test = (Mat_<img_data>(4,4) <<
+                 1, 2, 3, 4,
+                 5, 6, 7, 8,
+                 9,10,11,12,
+                13,14,15,16);
+
+    Mat_<img_data> test_i = mult_row_by_i(test);
+
+    Mat_<img_data> ti_ex =  (Mat_<img_data>(4,4) <<
+                             0, 0, 0, 0,
+                             5, 6, 7, 8,
+                             18, 20, 22, 24,
+                             39, 42, 45, 48);
+
+    compare_matrices_int(test_i,ti_ex);
+
+    Mat_<img_data> test_j = mult_col_by_j(test);
+
+    cout << test_j << endl;
+
+    Mat_<img_data> tj_ex =  (Mat_<img_data>(4,4) <<
+                             0, 2, 6, 12,
+                             0, 6, 14, 24,
+                             0, 10, 22, 36,
+                             0, 14, 30, 48);
+
+    compare_matrices_int(test_j,tj_ex);
 }
 
 
 
 TEST(TestGLCM, mean_std_deviation)
 {
-    Mat_<uint16_t> test_image = (Mat_<uint16_t>(4,4) <<
+    Mat_<img_data> test_image = (Mat_<img_data>(4,4) <<
                  1, 2, 3, 4,
                  5, 6, 7, 8,
                  9,10,11,12,
                 13,14,15,16);
 
-    Mat_<uint16_t> row_i= test_image.row(3);
-    Mat_<uint16_t> col_j = test_image.col(3);
+    Mat_<img_data> row_i= test_image.row(3);
+    Mat_<img_data> col_j = test_image.col(3);
 
     //EXPECT_DOUBLE_EQ(14.5, evaluate_mean(row_i));
     //EXPECT_DOUBLE_EQ(10, evaluate_mean(col_j));
@@ -158,9 +188,9 @@ TEST(TestGLCM, test_glcm)
     double angle = pi/6.+.0000000001;
     double distance = 1;
 
-    uint16_t levels = 4;
+    img_data levels = 4;
 
-    Mat_<uint16_t> test_image = (Mat_<uint16_t>(levels,levels) <<
+    Mat_<img_data> test_image = (Mat_<img_data>(levels,levels) <<
                  0, 0, 1, 1,
                  0, 0, 1, 1,
                  0, 2, 2, 2,
@@ -168,9 +198,9 @@ TEST(TestGLCM, test_glcm)
 
 
 
-    Mat_<uint16_t> glcm0 = gery_co_matrix(test_image,distance,angle,levels);
+    Mat_<img_data> glcm0 = gery_co_matrix(test_image,distance,angle,levels);
 
-    Mat_<uint16_t> expected_co_matrix = ( Mat_<uint16_t>(levels,levels) <<
+    Mat_<img_data> expected_co_matrix = ( Mat_<img_data>(levels,levels) <<
                                 1, 1, 3, 0,
                                 0, 1, 1, 0,
                                 0, 0, 0, 2,
@@ -188,9 +218,9 @@ TEST(TestGLCM, test_glcm)
 
     compare_matrices_double(glcm_n,expected_co_matrix_n);
 
-    Mat_<uint16_t> glcm_s = simmetrise_co_matrix(glcm0);
+    Mat_<img_data> glcm_s = simmetrise_co_matrix(glcm0);
 
-    Mat_<uint16_t> expected_co_matrix_s = ( Mat_<uint16_t>(levels,levels) <<
+    Mat_<img_data> expected_co_matrix_s = ( Mat_<img_data>(levels,levels) <<
                                           2, 1, 3, 0,
                                           1, 2, 1, 0,
                                           3, 1, 0, 2,
@@ -226,7 +256,7 @@ TEST(TestGLCM, test_glcm)
     cout << "correlation = " << correlation << endl;
 }
 
-typedef ::testing::Types<uint16_t> MyTypes;
+typedef ::testing::Types<img_data> MyTypes;
 TYPED_TEST_CASE(NumTest, MyTypes);
 
 int main(int argc, char **argv){
@@ -238,7 +268,7 @@ int main(int argc, char **argv){
     double angle = pi/6.+.0000000001;
     double distance = 1;
 
-    //test_square<uint16_t>(angle, distance);
+    //test_square<img_data>(angle, distance);
 
     return RUN_ALL_TESTS();
 }

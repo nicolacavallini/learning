@@ -49,12 +49,14 @@ def greycoprops(P, prop='contrast'):
         print P.shape
         print P[:,:,0,0]
         print "----------------------------------------------------------------"
+        print "P*I"
         Z = I*P
         print Z.shape
         print Z[:,:,0,0]
         c = np.apply_over_axes(np.sum, (I * P), axes=(0, 1))
         print c.shape
         print "----------------------------------------------------------------"
+        print "P*J"
         Z = J*P
         print Z.shape
         print Z[:,:,0,0]
@@ -63,7 +65,20 @@ def greycoprops(P, prop='contrast'):
         #print I
 
         diff_i = I - np.apply_over_axes(np.sum, (I * P), axes=(0, 1))[0, 0]
+        print "----------------------------------------------------------------"
+        print "diff_i"
+        print diff_i
+
+
+
         diff_j = J - np.apply_over_axes(np.sum, (J * P), axes=(0, 1))[0, 0]
+        print "----------------------------------------------------------------"
+        print "diff_j"
+        print diff_j
+
+        print "----------------------------------------------------------------"
+        print "(P * (diff_i) ** 2)"
+        print (P * (diff_i) ** 2)[:,:,0,0]
 
         #print diff_i
         #print diff_j
@@ -78,6 +93,7 @@ def greycoprops(P, prop='contrast'):
         # handle the special case of standard deviations near zero
         mask_0 = std_i < 1e-15
         print std_i
+        print std_j
         print mask_0
 
         mask_0[std_j < 1e-15] = True

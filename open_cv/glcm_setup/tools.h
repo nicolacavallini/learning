@@ -22,6 +22,28 @@ double mean = sum / v.size();
 double sq_sum = std::inner_product(v.begin(), v.end(), v.begin(), 0.0);
 double stdev = std::sqrt(sq_sum / v.size() - mean * mean);*/
 
+template<class input_format, class output_format>
+void print_matrix(const Mat_<input_format> &P)
+{
+    std::cout.precision(15);
+    cout << "[";
+    for (int i =0; i < P.rows; i++)
+    {
+        if (i!=0) cout << " ";
+        for (int j =0; j < P.cols; j++)
+        {
+            cout << (output_format)P(i,j);
+            if (j == P.cols-1 && i !=P.rows-1)
+                cout << endl;
+            else if (j == P.cols-1 && i ==P.rows-1)
+                break;
+            else
+                cout << ", ";
+        }
+    }
+    cout << "]" << endl;
+}
+
 template<class T>
 Mat_<T> create_i_long_column(int l)
 {
@@ -81,6 +103,38 @@ Mat_<T> mat_mat_mult(Mat_<T> &row, Mat_<T> &col)
     //gemm(col,row,1.,z,1.,result);
     return result;
 }
+
+template<class T>
+Mat_<T> mult_row_by_i(const Mat_<T> &row)
+{
+    int i = row.rows;
+    int j = row.cols;
+
+    Mat_<T> result(i,j);
+
+    for (int id = 0; id < i ; id++)
+        for (int jd = 0; jd < j ; jd++)
+            result(id,jd) = row(id,jd) * id;
+
+    //gemm(col,row,1.,z,1.,result);
+    return result;
+}
+
+template<class T>
+Mat_<T> mult_col_by_j(const Mat_<T> &row)
+{
+    int i = row.rows;
+    int j = row.cols;
+
+    Mat_<T> result(i,j);
+
+    for (int id = 0; id < i ; id++)
+        for (int jd = 0; jd < j ; jd++)
+            result(id,jd) = row(id,jd) * jd;
+
+    return result;
+}
+
 template<class T>
 Mat_<T> elem_elem_prod(Mat_<T> &row, Mat_<T> &col)
 {
@@ -105,16 +159,18 @@ Mat_<T> elem_elem_prod(Mat_<T> &row, Mat_<T> &col)
 template<class T>
 Mat_<T> shif_by_scalar(Mat_<T> &row, T shift, bool negative=true)
 {
-    Mat_<T> result(row.rows, row.cols);
-
     T sign = 1;
     if (negative)
         sign = -1;
 
-    auto ir = result.begin();
-    auto it = row.begin();
-    for (; it != row.end() ; ++it, ++ir)
-        *ir = *it + sign*shift;
+    int i = row.rows;
+    int j = row.cols;
+
+    Mat_<T> result(i,j);
+
+    for (int id = 0; id < i ; id++)
+        for (int jd = 0; jd < j ; jd++)
+            result(id,jd) = row(id,jd) + sign * shift;
 
     return result;
 }
@@ -201,11 +257,6 @@ double evaluate_contrast(const Mat_<T> &image)
     {
         int i = floor ((double)count / (double)image.cols);
         int j = count - image.cols*i;
-        //cout << "count = " << count;
-        //cout << ", i = " << i;
-        //cout << ", j = " << j;
-        //cout << ", element = " << *it;
-        //cout << ", pow((i-j),2) = " << pow((i-j),2) << endl;
         entropy += pow((i-j),2)* (double)*it;
         count++;
     }
@@ -331,64 +382,53 @@ vector<vector<bool>> mask_zero_std(vector<double> &std_i ,
 }
 
 template<class T>
-double sum_ij(const Mat_<T> &image)
+T sum_ij(const Mat_<T> &image)
 {
     return (double)accumulate(image.begin(),
                               image.end(), 0.0);
 }
 
 template<class  T>
-double evaluate_correlation(const Mat_<T> &image)
+double evaluate_correlation(Mat_<T> &image)
 {
-    vector<double> mean_i;
-    vector<double> std_i;
+    int levels = image.rows;
+    Mat_<T> i = create_i_long_column<uint16_t>(levels);
+    Mat_<T> j = create_j_long_row<uint16_t>(levels);
 
-    vector<double> mean_j;
-    vector<double> std_j;
-
-    cout << image <<endl;
-
-    for (int i=0; i <  image.rows; i ++){
-
-        Mat_<T> row = image.row(i);
-
-        mean_i.push_back(
-                    evaluate_glcm_mean(row,i));
-        std_i.push_back(evaluate_glcm_stdv(row,i));
-    }
-
-    for (int j=0; j <  image.cols; j ++){
-
-        Mat_<T> col = image.col(j);
-
-        mean_j.push_back(
-                    evaluate_glcm_mean(col,j));
-        std_j.push_back(evaluate_glcm_stdv(col,j));
-    }
-
-    vector<vector<bool>> mask = mask_zero_std(std_i,std_j);
-
-    double entropy = 0;
-
-    int count= 0;
-    auto it = image.begin();
-    for (; it != image.end() ; ++it)
-    {
-        int i = floor ((double)count / (double)image.cols);
-        int j = count - image.cols*i;
-
-        if (mask[i][j])
-            entropy += weight_correlation(i,j,
-                                          mean_i,std_i,
-                                          mean_j,std_j)
-                    * (double)*it;
-        else
-            entropy += (double)*it;
+    Mat_<T> pi = mult_row_by_i(image);
+    Mat_<T> pj = mult_col_by_j(image);
 
 
-        count++;
-    }
-    return entropy;
+    T spi = sum_ij(pi);
+    cout << spi << endl;
+    Mat_<T> diff_i = shif_by_scalar(i,spi);
+    T spj = sum_ij(pj);
+    cout << spj << endl;
+    Mat_<T> diff_j = shif_by_scalar(j,spj);
+
+
+
+
+    diff_i = elem_elem_prod(diff_i,diff_i);
+    Mat_<T> tmp = Mat_<T>::ones(1,image.cols);
+    diff_i = mat_mat_mult(diff_i,tmp);
+
+    Mat_<T> s_i = elem_elem_prod(image,diff_i);
+    double std_i = sqrt((double)sum_ij(s_i));
+
+    cout << "std_i = " << std_i << endl;
+
+    diff_j = elem_elem_prod(diff_j,diff_j);
+    tmp = Mat_<T>::ones(image.rows,1);
+    diff_j = mat_mat_mult(tmp,diff_j);
+
+    Mat_<T> s_j = elem_elem_prod(image,diff_j);
+    double std_j = sqrt((double)sum_ij(s_j));
+
+    cout << "std_j = " << std_j << endl;
+
+    double correlation;
+    return correlation;
 }
 
 template<class T>
@@ -435,28 +475,6 @@ Mat_<T> simmetrise_co_matrix( Mat_<T> &image)
             n(i,j)+=image(j,i);
 
     return n;
-}
-
-template<class input_format, class output_format>
-void print_matrix(Mat_<input_format> &P)
-{
-    std::cout.precision(15);
-    cout << "[";
-    for (int i =0; i < P.rows; i++)
-    {
-        if (i!=0) cout << " ";
-        for (int j =0; j < P.cols; j++)
-        {
-            cout << (output_format)P(i,j);
-            if (j == P.cols-1 && i !=P.rows-1)
-                cout << endl;
-            else if (j == P.cols-1 && i ==P.rows-1)
-                break;
-            else
-                cout << ", ";
-        }
-    }
-    cout << "]" << endl;
 }
 
 #endif // TOOLS_H

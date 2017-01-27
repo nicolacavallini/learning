@@ -63,6 +63,18 @@ TEST(TestGLCM, basic_tools)
                              0, 4, 8, 12, 16);
 
     compare_matrices_int(mm,mm_ex);
+
+    Mat_<uint16_t> uno = Mat_<uint16_t>::ones(5,5);
+
+    Mat_<uint16_t> el_el_prod = elem_elem_prod(uno,mm);
+
+    compare_matrices_int(mm_ex,el_el_prod);
+
+    Mat_<uint16_t> shifted = shif_by_scalar<uint16_t>(uno,1);
+
+    Mat_<uint16_t> zero = Mat_<uint16_t>::zeros(5,5);
+
+    compare_matrices_int(shifted,zero);
 }
 
 

@@ -71,8 +71,6 @@ Mat_<T> mat_mat_mult(Mat_<T> &row, Mat_<T> &col)
 
     Mat_<T> result(i,j);
 
-    Mat_<T> z = Mat_<T>::zeros(i,j);
-
     for (int id = 0; id < i ; id++){
         Mat_<T> r = row.row(id);
         for (int jd = 0; jd < j ; jd++){
@@ -86,17 +84,39 @@ Mat_<T> mat_mat_mult(Mat_<T> &row, Mat_<T> &col)
 template<class T>
 Mat_<T> elem_elem_prod(Mat_<T> &row, Mat_<T> &col)
 {
-    ASSERT(row.rows==col.rows, "the two array dimensions have to be the same");
-    ASSERT(row.cols==col.cols, "the two array dimensions have to be the same");
+    ASSERT(row.rows==col.rows, "the two arrays dimensions have to be the same");
+    ASSERT(row.cols==col.cols, "the two arrays dimensions have to be the same");
 
-    T acc = 0;
+    int i = row.rows;
+    int j = col.cols;
 
-    auto ir = row.begin();
-    auto ic = col.begin();
-    for (; ir != row.end() ; ++ir, ++ic)
-        acc+= *ir * *ic;
+    Mat_<T> result(i,j);
 
-    return acc;
+    for (int id = 0; id < i ; id++)
+        for (int jd = 0; jd < j ; jd++)
+            result(id,jd) = row(id,jd)*col(id,jd);
+
+    return result;
+}
+
+/**
+ * Given $x$ a shif of $x$ is $y = x -$`shift`.
+ */
+template<class T>
+Mat_<T> shif_by_scalar(Mat_<T> &row, T shift, bool negative=true)
+{
+    Mat_<T> result(row.rows, row.cols);
+
+    T sign = 1;
+    if (negative)
+        sign = -1;
+
+    auto ir = result.begin();
+    auto it = row.begin();
+    for (; it != row.end() ; ++it, ++ir)
+        *ir = *it + sign*shift;
+
+    return result;
 }
 
 template<class T>

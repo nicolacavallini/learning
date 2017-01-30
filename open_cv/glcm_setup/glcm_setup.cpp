@@ -6,7 +6,8 @@
 
 #include <math.h>
 
-#include "./tools.h"
+#include "./la/matrix_tools.h"
+#include "./glcm/analysis_tools.h"
 
 using namespace std;
 using namespace cv;

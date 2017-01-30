@@ -16,8 +16,14 @@ find_package (Threads)
 
 include_directories(${GTEST_INCLUDE_DIRS})
 
+add_subdirectory (la)
+add_subdirectory (glcm)
+
+
 add_executable( glcm_setup glcm_setup.cpp )
 target_link_libraries( glcm_setup ${OpenCV_LIBS} )
 target_link_libraries( glcm_setup ${Boost_LIBRARIES})
 target_link_libraries( glcm_setup ${GTEST_BOTH_LIBRARIES})
 target_link_libraries( glcm_setup ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries( glcm_setup la)
+target_link_libraries( glcm_setup glcm)

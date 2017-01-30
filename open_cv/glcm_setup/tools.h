@@ -370,7 +370,7 @@ vector<vector<bool>> mask_zero_std(vector<double> &std_i ,
 
         vector<bool> row;
         for (; ic != std_j.end(); ++ic){
-            cout << *ir << ", " << *ic << endl;
+            //cout << *ir << ", " << *ic << endl;
             if(*ir < 1e-15 || *ic < 1e-15)
                 row.push_back(false);
             else
@@ -389,44 +389,76 @@ T sum_ij(const Mat_<T> &image)
 }
 
 template<class  T>
-double evaluate_correlation(Mat_<T> &image)
+Mat_<T> evaluate_diff(Mat_<T> &image, string dir = "i")
 {
+    ASSERT(dir == "i" || dir == "j",
+    "the direction can be eather the row 'i' or the column `i`");
+
     int levels = image.rows;
-    Mat_<T> i = create_i_long_column<uint16_t>(levels);
-    Mat_<T> j = create_j_long_row<uint16_t>(levels);
 
-    Mat_<T> pi = mult_row_by_i(image);
-    Mat_<T> pj = mult_col_by_j(image);
+    Mat_<T> i, pi;
 
+    if(dir=="i"){
+        i = create_i_long_column<T>(levels);
+        pi = mult_row_by_i(image);
+    }
+    else if(dir=="j"){
+        i = create_j_long_row<T>(levels);
+        pi = mult_col_by_j(image);
+    }
 
     T spi = sum_ij(pi);
-    Mat_<T> diff_i = shif_by_scalar(i,spi);
+    return shif_by_scalar(i,spi);
+}
 
-    T spj = sum_ij(pj);
-    Mat_<T> diff_j = shif_by_scalar(j,spj);
+template<class  T>
+double evaluate_std(Mat_<T> &image, string dir = "i")
+{
+    ASSERT(dir == "i" || dir == "j",
+    "the direction can be eather the row 'i' or the column `i`");
 
+    Mat_<T> diff_i = evaluate_diff(image,dir);
 
+    Mat_<T> di = elem_elem_prod(diff_i,diff_i);
 
+    Mat_<T> tmp;
 
-    diff_i = elem_elem_prod(diff_i,diff_i);
-    Mat_<T> tmp = Mat_<T>::ones(1,image.cols);
-    diff_i = mat_mat_mult(diff_i,tmp);
+    if(dir=="i"){
+        tmp = Mat_<T>::ones(1,image.cols);
+        di = mat_mat_mult(di,tmp);
+    }
+    else if(dir=="j"){
+        tmp = Mat_<T>::ones(image.rows,1);
+        di = mat_mat_mult(tmp,di);
+    }
 
-    Mat_<T> s_i = elem_elem_prod(image,diff_i);
-    double std_i = sqrt((double)sum_ij(s_i));
+    Mat_<T> s_i = elem_elem_prod(image,di);
 
-    cout << "std_i = " << std_i << endl;
+    return sqrt((double)sum_ij(s_i));
+}
+template<class  T>
+T evaluate_covariance(Mat_<T> &image)
+{
+    Mat_<T> diff_i = evaluate_diff(image,"i");
+    Mat_<T> diff_j = evaluate_diff(image,"j");
 
-    diff_j = elem_elem_prod(diff_j,diff_j);
-    tmp = Mat_<T>::ones(image.rows,1);
-    diff_j = mat_mat_mult(tmp,diff_j);
+    Mat_<T> diff = mat_mat_mult(diff_i,diff_j);
 
-    Mat_<T> s_j = elem_elem_prod(image,diff_j);
-    double std_j = sqrt((double)sum_ij(s_j));
+    Mat_<T> c = elem_elem_prod(image,diff);
 
-    cout << "std_j = " << std_j << endl;
+    return sum_ij(c);
+}
 
-    double correlation;
+template<class  T>
+double evaluate_correlation(Mat_<T> &image)
+{
+    double std_i = evaluate_std(image,"i");
+
+    double std_j  = evaluate_std(image,"j");
+
+    T cov = evaluate_covariance(image);
+
+    double correlation = ((double)cov)/(std_i*std_j);
     return correlation;
 }
 

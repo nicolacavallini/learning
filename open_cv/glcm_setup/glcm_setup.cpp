@@ -96,8 +96,6 @@ TEST(TestGLCM, basic_tools)
 
     Mat_<img_data> test_j = mult_col_by_j(test);
 
-    cout << test_j << endl;
-
     Mat_<img_data> tj_ex =  (Mat_<img_data>(4,4) <<
                              0, 2, 6, 12,
                              0, 6, 14, 24,
@@ -109,23 +107,21 @@ TEST(TestGLCM, basic_tools)
 
 
 
-TEST(TestGLCM, mean_std_deviation)
+TEST(TestGLCM, std_deviation)
 {
     Mat_<img_data> test_image = (Mat_<img_data>(4,4) <<
-                 1, 2, 3, 4,
-                 5, 6, 7, 8,
-                 9,10,11,12,
-                13,14,15,16);
+                                  1, 1, 3, 0,
+                                  0, 1, 1, 0,
+                                  0, 0, 0, 2,
+                                  0, 0, 0, 0);
 
-    Mat_<img_data> row_i= test_image.row(3);
-    Mat_<img_data> col_j = test_image.col(3);
+    double std_i = evaluate_std(test_image,"i");
 
-    //EXPECT_DOUBLE_EQ(14.5, evaluate_mean(row_i));
-    //EXPECT_DOUBLE_EQ(10, evaluate_mean(col_j));
+    double std_j = evaluate_std(test_image,"j");
 
-    //EXPECT_NEAR(1.11803398874989,evaluate_stdv(row_i),1E-10);
 
-    //EXPECT_NEAR(4.47213595499958,evaluate_stdv(col_j),1E-10);
+    EXPECT_NEAR(16.18641406,std_i,1E-8);
+    EXPECT_NEAR(42.75511665,std_j,1E-8);
 }
 
 void print_mask(vector<vector<bool>> &mask,
@@ -252,8 +248,7 @@ TEST(TestGLCM, test_glcm)
     EXPECT_DOUBLE_EQ(4.6,homogeneity);
 
     double correlation = evaluate_correlation(glcm0);
-
-    cout << "correlation = " << correlation << endl;
+    EXPECT_NEAR(correlation,0.99269994,1E-8);
 }
 
 typedef ::testing::Types<img_data> MyTypes;

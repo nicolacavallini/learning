@@ -5,9 +5,9 @@
 
 template<class T>
 Mat_<T> gery_co_matrix(const Mat_<T> &image,
-                    const double &distance,
-                    const double &angle,
-                    const int &levels)
+                    const double distance,
+                    const double angle,
+                    const int levels)
 {
     Mat_<T> output = Mat_<T>::zeros(levels,
                             levels);
@@ -15,18 +15,18 @@ Mat_<T> gery_co_matrix(const Mat_<T> &image,
     int delta_r = (int)round(sin(angle)*distance);
     int delta_c = (int)round(cos(angle)*distance);
 
-    for (int r = 0; r< levels; r++){
-        for (int c =0; c < levels; c++){
+    for (int r = 0; r< image.rows; r++){
+        for (int c =0; c < image.cols; c++){
 
-            T i = image(r,c);
+            int i = (int)image(r,c);
 
             int d_row = r + delta_r;
             int d_col = c + delta_c;
 
-            if (d_row >= 0 && d_row < levels &&
-                d_col >= 0 && d_col < levels ){
+            if (d_row >= 0 && d_row < image.rows &&
+                d_col >= 0 && d_col < image.cols ){
 
-                T j = image(d_row,d_col);
+                int j = (int)image(d_row,d_col);
 
                 if (i >= 0 && i < levels &&
                     j >= 0 && j < levels){
@@ -36,7 +36,6 @@ Mat_<T> gery_co_matrix(const Mat_<T> &image,
             }
         }
     }
-
     return output;
 }
 
@@ -253,9 +252,15 @@ Mat_<T> simmetrise_co_matrix( Mat_<T> &image)
 
 
 template Mat_<int> gery_co_matrix(const Mat_<int> &image,
-                    const double &distance,
-                    const double &angle,
-                    const int &levels);
+                    const double distance,
+                    const double angle,
+                    const int levels);
+
+template Mat_<uint16_t> gery_co_matrix(const Mat_<uint16_t> &image,
+                    const double distance,
+                    const double angle,
+                    const int levels);
+
 
 template void explore_matrix(const Mat_<int> &image);
 template double evaluate_energy(const Mat_<int> &image);
@@ -263,10 +268,12 @@ template double evaluate_energy(const Mat_<double> &image);
 template double evaluate_contrast(const Mat_<int> &image);
 template double evaluate_homogeneity(const Mat_<int> &image);
 template double evaluate_dissimilarity(const Mat_<int> &image);
+template double evaluate_dissimilarity(const Mat_<double> &image);
 template Mat_<int> evaluate_diff(Mat_<int> &image, string dir = "i");
 template double evaluate_std(Mat_<int> &image, string dir = "i");
 template int evaluate_covariance(Mat_<int> &image);
 template double evaluate_correlation(Mat_<int> &image);
+template double evaluate_correlation(Mat_<double> &image);
 template double evaluate_entropy(const Mat_<int> &image);
 template Mat_<double> normalise_co_matrix(const Mat_<int> &image);
 template Mat_<double> normalise_co_matrix(const Mat_<double> &image);

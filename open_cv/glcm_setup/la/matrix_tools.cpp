@@ -82,7 +82,6 @@ Mat_<T> mat_mat_mult(Mat_<T> &row, Mat_<T> &col)
             result(id,jd) = scalar_prod(r,c);
         }
     }
-    //gemm(col,row,1.,z,1.,result);
     return result;
 }
 
@@ -185,19 +184,32 @@ T sum_ij(const Mat_<T> &image)
 
 template void print_matrix<int,int>(const Mat_<int> &P);
 
-template Mat_<int> create_i_long_column<int>(int l);
-template Mat_<int> create_j_long_row<int>(int l);
+
 template int scalar_prod(Mat_<int> &row, Mat_<int> &col);
 template Mat_<int> mat_mat_mult(Mat_<int> &row, Mat_<int> &col);
+template Mat_<double> mat_mat_mult(Mat_<double> &row, Mat_<double> &col);
 
 template Mat_<int> elem_elem_prod(Mat_<int> &row, Mat_<int> &col);
+template Mat_<double> elem_elem_prod(Mat_<double> &row, Mat_<double> &col);
+
+
 template Mat_<int> shif_by_scalar(Mat_<int> &row,
                                   int shift, bool negative=true);
+template Mat_<double> shif_by_scalar(Mat_<double> &row,
+                                  double shift, bool negative=true);
 
 template Mat_<int> mult_row_by_i(const Mat_<int> &row);
-template Mat_<int> mult_col_by_j(const Mat_<int> &row);
+template Mat_<double> mult_row_by_i(const Mat_<double> &row);
 
-template Mat_<uint8_t> create_i_long_column<uint8_t>(int l);
-template Mat_<uint8_t> create_j_long_row<uint8_t>(int l);
+template Mat_<int> mult_col_by_j(const Mat_<int> &row);
+template Mat_<double> mult_col_by_j(const Mat_<double> &row);
+
+
+template Mat_<int> create_i_long_column<int>(int l);
+template Mat_<double> create_i_long_column(int l);
+
+template Mat_<double> create_j_long_row(int l);
+template Mat_<int> create_j_long_row<int>(int l);
 
 template int sum_ij(const Mat_<int> &image);
+template double sum_ij(const Mat_<double> &image);

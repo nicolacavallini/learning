@@ -80,13 +80,18 @@ def greycoprops(P, prop='contrast'):
         print "(P * (diff_i) ** 2)"
         print (P * (diff_i) ** 2)[:,:,0,0]
 
-        #print diff_i
-        #print diff_j
+        print "diff_i = ", diff_i[:,:,0,0]
+        print "diff_j = ", diff_j[:,:,0,0]
 
         std_i = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_i) ** 2),
                                            axes=(0, 1))[0, 0])
         std_j = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_j) ** 2),
                                            axes=(0, 1))[0, 0])
+
+        print "P * (diff_i * diff_j) = "
+        print np.apply_over_axes(np.sum, P*(diff_i * diff_j),
+                                 axes=(0, 1))[0,0]
+
         cov = np.apply_over_axes(np.sum, (P * (diff_i * diff_j)),
                                  axes=(0, 1))[0, 0]
 

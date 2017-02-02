@@ -10,9 +10,9 @@ using namespace std;
 
 template<class T>
 Mat_<T> gery_co_matrix(const Mat_<T> &image,
-                    const double &distance,
-                    const double &angle,
-                    const int &levels);
+                    const double distance,
+                    const double angle,
+                    const int levels);
 
 template<class T>
 void explore_matrix(const Mat_<T> &image);

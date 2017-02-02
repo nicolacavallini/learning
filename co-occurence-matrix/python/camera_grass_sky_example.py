@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from skimage.feature import greycomatrix, greycoprops
 from skimage import data
 
+from skimage.io import imsave
+
 
 PATCH_SIZE = 21
 
@@ -19,7 +21,7 @@ for loc in grass_locations:
                                loc[1]:loc[1] + PATCH_SIZE])
 
 print(type(grass_patches))
-
+print grass_patches[0]
 
 # select some patches from sky areas of the image
 sky_locations = [(54, 48), (21, 233), (90, 380), (195, 330)]
@@ -33,8 +35,16 @@ xs = []
 ys = []
 for patch in (grass_patches + sky_patches):
     glcm = greycomatrix(patch, [5], [0], 256, symmetric=True, normed=True)
+    print glcm.shape
     xs.append(greycoprops(glcm, 'dissimilarity')[0, 0])
     ys.append(greycoprops(glcm, 'correlation')[0, 0])
+
+print "dissimilarity:"
+print xs
+print "correlation"
+print ys
+
+
 
 # create the figure
 fig = plt.figure(figsize=(8, 8))
@@ -79,3 +89,5 @@ for i, patch in enumerate(sky_patches):
 # display the patches and plot
 fig.suptitle('Grey level co-occurrence matrix features', fontsize=14)
 plt.show()
+
+imsave("camera.jpg",image)

@@ -1,8 +1,10 @@
 #include <iostream>
+#include <array>
 
 #include "gtest/gtest.h"
 
 #include <cv.h>
+#include "opencv2/imgcodecs.hpp"
 
 #include <math.h>
 
@@ -106,8 +108,6 @@ TEST(TestGLCM, basic_tools)
     compare_matrices_int(test_j,tj_ex);
 }
 
-
-
 TEST(TestGLCM, std_deviation)
 {
     Mat_<img_data> test_image = (Mat_<img_data>(4,4) <<
@@ -170,11 +170,6 @@ TEST(TestGLCM, mask)
         {true, true, false, true, true}};
 
     compare_vec_of_vec(mask,mask_ex);
-    //EXPECT_DOUBLE_EQ(10, evaluate_mean(col_j));
-
-    //EXPECT_NEAR(1.11803398874989,evaluate_stdv(row_i),1E-10);
-
-    //EXPECT_NEAR(4.47213595499958,evaluate_stdv(col_j),1E-10);
 }
 
 
@@ -251,6 +246,88 @@ TEST(TestGLCM, test_glcm)
     double correlation = evaluate_correlation(glcm0);
     EXPECT_NEAR(correlation,0.99269994,1E-8);
 }
+
+TEST(TestGLCM, test_image_read)
+{
+
+    Mat src = imread( "./4x6_pixel_grayscale.png", IMREAD_GRAYSCALE );
+
+    Mat_<img_data> image(src);
+
+    Mat_<img_data> expected_img = ( Mat_<img_data>(4,6) <<
+    0, 255,  61,  54,  54, 225,
+     0,   0,  61,  54,   0, 199,
+   199,   0,   0,  61,  48, 199,
+   199, 176, 225, 225,   0, 199);
+
+    compare_matrices_int(image,expected_img);
+
+}
+
+TEST(TestGLCM, camera_image_read)
+{
+    Mat src = imread( "./camera.png", IMREAD_GRAYSCALE );
+
+    Mat_<img_data> image(src);
+
+    Range d1(0,10);
+    Range d2(0,10);
+
+    Mat_<img_data> patch = image(d1,d2);
+
+    Mat_<img_data> expected_patch = ( Mat_<img_data>(10,10) <<
+    156, 157, 160, 159, 158, 156, 155, 156, 158, 157,
+    156, 157, 159, 158, 158, 156, 155, 156, 158, 157,
+    158, 157, 156, 156, 157, 157, 157, 157, 157, 158,
+    160, 157, 154, 154, 156, 157, 158, 157, 157, 158,
+    158, 157, 156, 156, 157, 156, 155, 155, 157, 157,
+    156, 157, 159, 159, 159, 156, 154, 155, 158, 157,
+    158, 157, 156, 156, 157, 156, 155, 155, 157, 157,
+    160, 157, 154, 154, 156, 157, 158, 157, 157, 158,
+    158, 155, 153, 153, 155, 157, 158, 158, 158, 157,
+    156, 154, 153, 153, 155, 157, 159, 159, 159, 157);
+
+    compare_matrices_int(patch,expected_patch);
+}
+
+TEST(TestGLCM, camera_image_analysis)
+{
+    Mat src = imread( "./camera.png", IMREAD_GRAYSCALE );
+
+    Mat_<img_data> image(src);
+
+    int patch_size = 21;
+
+    array<int,2> patch_location = {474, 291};
+
+    Range d1(patch_location[0],
+            patch_location[0]+patch_size);
+    Range d2(patch_location[1],
+            patch_location[1]+patch_size);
+
+    Mat_<img_data> patch = image(d1,d2);
+
+    //cout << patch << endl;
+
+    const double pi = M_PI;
+
+    double angle = 0*pi;
+    double distance = 5;
+
+    Mat_<img_data> glcm0 =
+            gery_co_matrix(patch,distance,angle,256);
+
+    //cout << glcm0 << endl;
+    glcm0 = simmetrise_co_matrix(glcm0);
+    Mat_<double> glcm_d = normalise_co_matrix(glcm0);
+
+    double dissimilarity = evaluate_dissimilarity(glcm_d);
+    EXPECT_NEAR(14.175595238095237,dissimilarity,1E-8);
+
+    double correlation = evaluate_correlation(glcm_d);
+    EXPECT_NEAR(-0.0032216726109186898,correlation,1E-8);
+}
+
 
 typedef ::testing::Types<img_data> MyTypes;
 TYPED_TEST_CASE(NumTest, MyTypes);

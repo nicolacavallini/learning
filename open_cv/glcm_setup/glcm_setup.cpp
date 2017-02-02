@@ -11,6 +11,8 @@
 #include "./la/matrix_tools.h"
 #include "./glcm/analysis_tools.h"
 
+#include "./vars.h"
+
 using namespace std;
 using namespace cv;
 
@@ -249,8 +251,10 @@ TEST(TestGLCM, test_glcm)
 
 TEST(TestGLCM, test_image_read)
 {
+    string filename = cmake_source_dir +
+            string("/data/4x6_pixel_grayscale.png");
 
-    Mat src = imread( "./4x6_pixel_grayscale.png", IMREAD_GRAYSCALE );
+    Mat src = imread(filename , IMREAD_GRAYSCALE );
 
     Mat_<img_data> image(src);
 
@@ -266,7 +270,10 @@ TEST(TestGLCM, test_image_read)
 
 TEST(TestGLCM, camera_image_read)
 {
-    Mat src = imread( "./camera.png", IMREAD_GRAYSCALE );
+    string filename = cmake_source_dir +
+            string("/data/camera.png");
+
+    Mat src = imread( filename, IMREAD_GRAYSCALE );
 
     Mat_<img_data> image(src);
 
@@ -292,7 +299,11 @@ TEST(TestGLCM, camera_image_read)
 
 TEST(TestGLCM, camera_image_analysis)
 {
-    Mat src = imread( "./camera.png", IMREAD_GRAYSCALE );
+    string filename = cmake_source_dir +
+            string("/data/camera.png");
+
+    Mat src = imread( filename, IMREAD_GRAYSCALE );
+
 
     Mat_<img_data> image(src);
 

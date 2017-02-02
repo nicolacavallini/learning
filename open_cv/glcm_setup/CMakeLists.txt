@@ -16,6 +16,8 @@ find_package (Threads)
 
 include_directories(${GTEST_INCLUDE_DIRS})
 
+configure_file( vars.h.in ${CMAKE_SOURCE_DIR}/vars.h @ONLY )
+
 add_subdirectory (la)
 add_subdirectory (glcm)
 

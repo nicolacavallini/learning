@@ -35,8 +35,7 @@ int main()
 
     write_vector_to_binary("outfile.dat",vec);
 
-    std::vector<double> read =
-    read_binary_to_vector<double>("outfile.dat");
+    std::vector<double> read = read_binary_to_vector<double>("outfile.dat");
 
     for (auto const& r: read)
         std::cout << "value = " << r << std::endl;

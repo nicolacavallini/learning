@@ -5,13 +5,15 @@ from skimage import data
 
 from skimage.io import imsave
 
+from matplotlib.backends.backend_pdf import PdfPages
+
 
 PATCH_SIZE = 21
 
 # open the camera image
 image = data.camera()
-print(type(image[0]))
-print(image.shape)
+#print(type(image[0]))
+#print(image.shape)
 
 # select some patches from grassy areas of the image
 grass_locations = [(474, 291), (440, 433), (466, 18), (462, 236)]
@@ -21,7 +23,7 @@ for loc in grass_locations:
                                loc[1]:loc[1] + PATCH_SIZE])
 
 print(type(grass_patches))
-print grass_patches[0]
+#print grass_patches[0]
 
 # select some patches from sky areas of the image
 sky_locations = [(54, 48), (21, 233), (90, 380), (195, 330)]
@@ -33,16 +35,22 @@ for loc in sky_locations:
 # compute some GLCM properties each patch
 xs = []
 ys = []
+pp = PdfPages('sparsity_patterns.pdf')
 for patch in (grass_patches + sky_patches):
     glcm = greycomatrix(patch, [5], [0], 256, symmetric=True, normed=True)
     print glcm.shape
+    plt.figure()
+    plt.spy(glcm[:,:,0,0])
+    pp.savefig()
+    plt.show()
     xs.append(greycoprops(glcm, 'dissimilarity')[0, 0])
     ys.append(greycoprops(glcm, 'correlation')[0, 0])
 
-print "dissimilarity:"
-print xs
-print "correlation"
-print ys
+pp.close()
+#print "dissimilarity:"
+#print xs
+#print "correlation"
+#print ys
 
 
 

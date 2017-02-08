@@ -6,28 +6,43 @@ http://scikit-image.org/docs/dev/api/skimage.feature.html?highlight=greycomatrix
 import numpy as np
 from skimage.feature import greycomatrix, greycoprops
 
+import glcm
+
+
 if __name__== "__main__":
 
+    #horizontal_difference()
+    #vertical_difference()
     image = np.array([[0, 0, 1],\
                       [0, 0, 1],\
                       [0, 2, 2]])
 
-    c_left = np.array([[1, 1, 0, 1, 1, 0, 1, 0, 0 ],\
-                       [0, 0, 1, 0, 0, 1, 0, 0, 0 ],\
-                       [0, 0, 0, 0, 0, 0, 0, 1, 1 ]])
-
-
-    perm = np.eye(9,9,1,dtype=int) + np.eye(9,9,-8,dtype=int)
-
-    c_right = c_left.dot(perm)
-
-    print c_left.dot(np.transpose(c_right))
-
     ray = [1]
-    theta = [0]
-    result = greycomatrix(image, ray, theta, levels=3, symmetric=True)
+    theta = [np.pi/2.]
+
+    levels = 3
+
+    start_pixel, end_pixel= \
+    glcm.evaluate_geometrical_roule(image,ray[0],theta[0],levels)
+    print "start = ", start_pixel
+    print "end = ", end_pixel
+
+    glc_matrix = glcm.grey_level_co_occurence_m(image,levels,start_pixel,end_pixel)
+
+
+
+    #print start_matrix.todense()
+    #print end_matrix.todense()
+    print glc_matrix.todense()
+    #print start_grey_vals
+
+
+
+
+    result = greycomatrix(image, ray, theta, levels=3, symmetric=False)
 
     print result[:,:,0,0]
+
 
 
     """image = np.array([[0, 0, 1, 1],\

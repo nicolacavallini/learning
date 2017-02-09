@@ -1,17 +1,28 @@
+#include <fstream>
 #include <iostream>
 #include <math.h>
 #include <array>
 
 #include <deal.II/base/logstream.h>
+#include <deal.II/lac/sparsity_pattern.h>
+
+#include <deal.II/numerics/data_out.h>
 
 #include <deal.II/lac/full_matrix.h>
 #include <deal.II/lac/full_matrix.templates.h>
 
+#include <deal.II/lac/sparse_matrix.h>
+#include <deal.II/lac/sparse_matrix.templates.h>
+
 using namespace dealii;
 
 template class FullMatrix<int>;
+template class SparseMatrix<int>;
 
 using namespace std;
+
+typedef unsigned int size_m;
+typedef int gl_t;
 
 template <typename number>
 void
@@ -80,12 +91,14 @@ vector<GREY> get_grey_levels(FullMatrix<GREY> &image,
 
 int main()
 {
-    FullMatrix<int> m;
+    FullMatrix<gl_t> m;
     m.reinit(4,4);
     m(0,0) = 0; m(0,1) = 0; m(0,2) = 1; m(0,3) = 1;
     m(1,0) = 0; m(1,1) = 0; m(1,2) = 1; m(1,3) = 1;
     m(2,0) = 0; m(2,1) = 2; m(2,2) = 2; m(2,3) = 2;
     m(3,0) = 2; m(3,1) = 2; m(3,2) = 3; m(3,3) = 3;
+
+    gl_t g_levels = 4;
 
     print_matrix(m);
 
@@ -94,16 +107,36 @@ int main()
     double angle = pi/2;
     double distance = 1;
 
-    vector<unsigned int> start_pixel;
-    vector<unsigned int> end_pixel;
+    vector<size_m> start_pixel;
+    vector<size_m> end_pixel;
 
     evaluate_spatial_roule(m.m(),m.n(),distance,angle,
                            start_pixel,end_pixel);
 
+    cout << "# of spatial rules = " << start_pixel.size() << endl;
+
     auto start_grey_levels = get_grey_levels(m,start_pixel);
+    auto end_grey_levels = get_grey_levels(m,end_pixel);
+
+    SparsityPattern start_sp;
+    size_m rows = (size_m)start_pixel.size();
+    size_m cols = (size_m)g_levels;
+    start_sp.reinit(rows,cols,1);
+
+    size_m rid = 0;
+    for(auto const& cid: start_grey_levels)
+    {
+        cout << "start_grey_levels = " << cid << endl;
+        start_sp.add(rid,cid);
+        rid+=1;
+    }
 
 
 
+
+
+    std::ofstream out ("sparsity_pattern.svg");
+    start_sp.print_svg (out);
 
 
     cout << "stocazzo" << endl;

@@ -182,40 +182,6 @@ int main()
 
     make_glcm<gl_t,size_m>(m,g_levels,distance,angle,glcm_sp,glcm);
 
-
-    /*vector<SIZE_T> start_pixel;
-    vector<SIZE_T> end_pixel;
-
-    evaluate_spatial_roule(m.m(),m.n(),distance,angle,
-                           start_pixel,end_pixel);
-
-    cout << "# of spatial rules = " << start_pixel.size() << endl;
-
-    auto start_grey_levels = get_grey_levels(m,start_pixel);
-    auto end_grey_levels = get_grey_levels(m,end_pixel);
-
-    SparsityPattern start_sp;
-    SparseMatrix<gl_t> start_connectivity_matrix;
-    make_connectivity_matrix(start_pixel,start_grey_levels,g_levels,
-                             start_sp,start_connectivity_matrix);
-
-    SparsityPattern end_sp;
-    SparseMatrix<gl_t> end_connectivity_matrix;
-    make_connectivity_matrix(end_pixel,end_grey_levels,g_levels,
-                             end_sp,end_connectivity_matrix);
-
-    SparsityPattern glcm_sp;
-    SparseMatrix<gl_t> glcm;
-
-    glcm_sp.reinit(g_levels,g_levels,1);
-    glcm_sp.compress();
-    glcm.reinit(glcm_sp);
-
-    start_connectivity_matrix.print(cout);
-    end_connectivity_matrix.print(cout);
-
-    start_connectivity_matrix.Tmmult(glcm,end_connectivity_matrix);*/
-
     glcm.print(cout);
 
     return 0;

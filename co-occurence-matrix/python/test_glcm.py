@@ -28,6 +28,7 @@ def test_4x4():
 
     print "==================="
     print "4x4 test pssed?"
+    print glc_matrix.todense()
     print np.all(glc_matrix.todense()==result[:,:,0,0])
     print "==================="
 

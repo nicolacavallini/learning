@@ -1,0 +1,13 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
+
+SET(DEAL_II_DIR /home/nicola/local/usr/dealii/)
+
+FIND_PACKAGE(deal.II 8.5.0 REQUIRED
+  HINTS ${DEAL_II_DIR} ../ ../../ $ENV{DEAL_II_DIR}
+  )
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+
+PROJECT(learn_dealii)
+
+ADD_EXECUTABLE(symmetrize symmetrize.cc)
+DEAL_II_SETUP_TARGET(symmetrize)

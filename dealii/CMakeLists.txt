@@ -9,5 +9,11 @@ DEAL_II_INITIALIZE_CACHED_VARIABLES()
 
 PROJECT(learn_dealii)
 
-ADD_EXECUTABLE(symmetrize symmetrize.cc)
-DEAL_II_SETUP_TARGET(symmetrize)
+ADD_EXECUTABLE(symmetrize_00 symmetrize_00.cc)
+DEAL_II_SETUP_TARGET(symmetrize_00)
+
+ADD_EXECUTABLE(symmetrize_01 symmetrize_01.cc)
+DEAL_II_SETUP_TARGET(symmetrize_01)
+
+ADD_EXECUTABLE(symmetrize_02 symmetrize_02.cc)
+DEAL_II_SETUP_TARGET(symmetrize_02)

@@ -2,9 +2,12 @@
 #include <memory>
 
 #include <deal.II/lac/vector.h>
+#include <deal.II/lac/vector.templates.h>
 
 using namespace std;
 using namespace dealii;
+
+template class Vector<int>;
 
 template< class T>
 class GLCM{
@@ -26,28 +29,27 @@ public:
 };
 
 template< class T>
-class NormalizedGLCM : protected GLCM<double>{
+class NormalizedGLCM : public GLCM<double>{
 public:
-    NormalizedGLCM(GLCM<T> &glcm) : GLCM<double>(5){
+    NormalizedGLCM(GLCM<T> &glcm) {
         auto tmp = glcm.get_v();
         double somma = tmp->norm_sqr();
-        cout << "somma = " << somma << endl;
-        this->v.reset(new Vector<double>(5));
+        //*tmp /= somma;
+        v.reset(new Vector<double>(*tmp));
+        *v /= somma;
     }
-
-    /*GLCM(unsigned int in) : v(new Vector<T>()){
-        v->reinit(in);
-        *v = 1;
-    }
-    void print_info(){
-        v->print(cout);
-    }
-protected:
-    shared_ptr<Vector<T>> v;*/
 };
 
 
+/*template< class T>
+class NormalizedGLCM : protected GLCM<double>{
+public:
+    NormalizedGLCM(GLCM<T> &glcm) : v(new Vector<T>()) {
+    }
+};*/
 
+template class GLCM<int>;
+template class NormalizedGLCM<int>;
 
 int main(){
     GLCM<int> glcm(5);

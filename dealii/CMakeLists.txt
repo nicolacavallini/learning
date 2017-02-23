@@ -17,3 +17,6 @@ DEAL_II_SETUP_TARGET(symmetrize_01)
 
 ADD_EXECUTABLE(symmetrize_02 symmetrize_02.cc)
 DEAL_II_SETUP_TARGET(symmetrize_02)
+
+ADD_EXECUTABLE(inheritance_00 inheritance_00.cc)
+DEAL_II_SETUP_TARGET(inheritance_00)

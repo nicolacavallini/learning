@@ -40,14 +40,6 @@ public:
     }
 };
 
-
-/*template< class T>
-class NormalizedGLCM : protected GLCM<double>{
-public:
-    NormalizedGLCM(GLCM<T> &glcm) : v(new Vector<T>()) {
-    }
-};*/
-
 template class GLCM<int>;
 template class NormalizedGLCM<int>;
 

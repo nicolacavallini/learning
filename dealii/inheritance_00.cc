@@ -24,7 +24,7 @@ public:
     shared_ptr<Vector<T>> get_v(){
         return v;
     }
-//protected:
+protected:
     shared_ptr<Vector<T>> v;
 };
 

@@ -79,8 +79,8 @@ def test_3x3():
 
 def test_6x6():
 
-    #grey_levels = 256
-    #img = imread("6x6_pixel_grayscale.png", as_grey=True)
+    """grey_levels = 256
+    img = imread("6x6_pixel_grayscale.png", as_grey=True)"""
 
     grey_levels = 4
     img = np.array([[0, 0, 1, 1,0,1],\
@@ -93,12 +93,13 @@ def test_6x6():
 
 
     angles = np.arange(0,7)/4.*np.pi
+    distance = 2.
 
     for i in range(2,4):
         for j in range(2,4):
             patch = img[i-2:i+2,j-2:j+2]
             for a in angles:
-                glcm_ = glcm.grey_level_co_occurence_m(patch,grey_levels,2.,a)
+                glcm_ = glcm.grey_level_co_occurence_m(patch,grey_levels,distance,a)
                 print get_direction(a)
                 print glcm_.todense()
 

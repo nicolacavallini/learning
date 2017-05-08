@@ -4,6 +4,7 @@ from skimage.feature import greycomatrix, greycoprops
 from skimage import data
 
 from skimage.io import imsave
+from skimage.io import imread
 
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -38,17 +39,46 @@ def test_3x3():
                       [0, 2, 2]])
 
     ray = [1]
-    theta = [np.pi/2.]
+    theta = [np.pi/4.]
 
     levels = 3
 
     glc_matrix = glcm.grey_level_co_occurence_m(image,levels,ray[0],theta[0])
+
+    print glc_matrix.todense()
+
+
     result = greycomatrix(image, ray, theta, levels, symmetric=False)
 
     print "==================="
     print "3x3 test pssed?"
     print np.all(glc_matrix.todense()==result[:,:,0,0])
     print "==================="
+
+def test_6x6():
+
+    #grey_levels = 256
+    #img = imread("6x6_pixel_grayscale.png", as_grey=True)
+
+    grey_levels = 4
+    img = np.array([[0, 0, 1, 1,0,1],\
+                  [0, 0, 1, 1,0,2],\
+                  [0, 2, 2, 2,1,1],\
+                  [2, 2, 3, 3,3,2],\
+                  [1, 1, 2, 3,1,2],
+                  [3, 3, 1, 1,2,2]],\
+                  dtype=np.uint8)
+
+
+    angles = np.arange(0,7)/4.*np.pi
+
+    for i in range(2,4):
+        for j in range(2,4):
+            patch = img[i-2:i+2,j-2:j+2]
+            for a in angles:
+                glcm_ = glcm.grey_level_co_occurence_m(patch,grey_levels,2.,a)
+                print glcm_.todense()
+
 
 def camera_test():
     PATCH_SIZE = 13
@@ -134,6 +164,7 @@ def glcm_measures():
 if __name__ == "__main__":
     test_4x4()
     test_3x3()
+    test_6x6()
     camera_test()
     energy_4x4()
     glcm_measures()

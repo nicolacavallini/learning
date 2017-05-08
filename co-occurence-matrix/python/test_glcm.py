@@ -12,6 +12,28 @@ import glcm
 
 import numpy as np
 
+def get_direction(in_angle):
+
+    if abs(in_angle) - 0. < 1e-10:
+        direction ="east"
+    elif abs(in_angle - np.pi/2.) < 1e-10:
+        direction ="south"
+    elif abs(in_angle - np.pi) < 1e-10:
+        direction ="west"
+    elif abs(in_angle - np.pi) < 1e-10:
+        direction ="west"
+    elif abs(in_angle - 3./2. * np.pi) < 1e-10:
+        direction ="north"
+    elif abs(in_angle - 1./4. * np.pi) < 1e-10:
+        direction ="south-east"
+    elif abs(in_angle - 3./4. * np.pi) < 1e-10:
+        direction ="south-west";
+    elif abs(in_angle - 5./4. * np.pi) < 1e-10:
+        direction ="north-west"
+    elif abs(in_angle - 7./4. * np.pi) < 1e-10:
+        direction ="north-east";
+    return direction
+
 def test_4x4():
     image = np.array([[0, 0, 1, 1],\
                   [0, 0, 1, 1],\
@@ -77,6 +99,7 @@ def test_6x6():
             patch = img[i-2:i+2,j-2:j+2]
             for a in angles:
                 glcm_ = glcm.grey_level_co_occurence_m(patch,grey_levels,2.,a)
+                print get_direction(a)
                 print glcm_.todense()
 
 

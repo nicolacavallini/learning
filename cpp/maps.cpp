@@ -30,6 +30,13 @@ int main(){
         cout << "map = "<< it->first  << ", "
              << it->second[0] << ", "<< it->second[1] << endl;
     }
+    
+    auto arr = test::mappa_arr["here"];
+    
+    double v = test::array[0];
+    
+    test::mappa_arr["ciao"] = {12,13};
+    
 
     auto it_ = ::test::mappa_arr.begin();
     for (; it_!=::test::mappa_arr.end(); ++it_){

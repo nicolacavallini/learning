@@ -33,7 +33,7 @@ int main(){
     
     auto arr = test::mappa_arr["here"];
     
-    double v = test::array[0];
+    double v = arr[0];
     
     test::mappa_arr["ciao"] = {12,13};
     

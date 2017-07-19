@@ -118,6 +118,9 @@ def camera_test():
     nico_glcm = glcm.grey_level_co_occurence_m(patch,256,5.,0)
     interpreted_scikit_glcm = glcm.scikit(patch,256,5.,0)
 
+    plt.spy(nico_glcm)
+    plt.show()
+
     print "==================="
     print "camera test passed?"
     print np.all(nico_glcm.todense()== compiled_scikit_glcm[:,:,0,0])
@@ -173,9 +176,7 @@ def glcm_measures():
     nnz_id = np.nonzero(glcm[:,:,0,0])
     #print glcm[nnz_id]
     print np.sum(glcm[nnz_id]**2)
-    #plt.spy(glcm)
-    #plt.show()
-    print pow(greycoprops(glcm, 'energy'),2)
+
 
 
     """print "==================="

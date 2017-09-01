@@ -127,8 +127,17 @@ void draw_1d_gaussian_mixture(cv::Mat img, float* mean, float* stddev, float* pi
     }
 }
 
+void print_vec(float* v, int size){
+
+    for (int i = 0; i< size; i++){
+        printf("v = %f\n",v[i]);
+    }
+}
+
+
+
 void run_gaussian_mixture_1d() {
-    const int num_components = 5;
+    const int num_components =5;
     const int count_per_component = 100;
     float *data = new float[num_components*count_per_component];
 
@@ -141,6 +150,10 @@ void run_gaussian_mixture_1d() {
     }
 
     float* initial_guess = get_data_means_var(data, count_per_component, num_components);
+
+
+
+
     int total = num_components * count_per_component;
     float* responsibility = new float[num_components*total];
     float* pi             = new float[num_components];
@@ -153,7 +166,7 @@ void run_gaussian_mixture_1d() {
         pi[i] = 1.0f/num_components;
     }
 
-    for(int iter=0;iter<100;iter++) {
+    for(int iter=0;iter<1;iter++) {
         // E step
         for(int i=0;i<total;i++) {
             float total_prob = 0.0f;
@@ -171,6 +184,15 @@ void run_gaussian_mixture_1d() {
                 }
             }
         }
+
+        //if (iter==100)
+        //    print_vec(responsibility,num_components*total);
+
+
+
+
+
+
         // M step
         float* nc = new float[num_components];
         memset(nc, 0, sizeof(float) * num_components);
@@ -179,6 +201,8 @@ void run_gaussian_mixture_1d() {
                 nc[j] += responsibility[i*num_components+j];
             }
         }
+
+        print_vec(nc,num_components);
 
         for(int j=0;j<num_components;j++) {
             pi[j] = nc[j]/total;
@@ -215,7 +239,7 @@ void run_gaussian_mixture_1d() {
         printf("Iteration %04d\n", iter);
         for(int j=0;j<num_components;j++) {
 
-            printf("Learned #%d - mean = %f, td = %f, pi =%f\n", j, learned_means[j], learned_std[j], pi[j]);
+            printf("Learned #%d - mean = %f, std = %f, pi =%f\n", j, learned_means[j], learned_std[j], pi[j]);
         }
 
         char file[100];

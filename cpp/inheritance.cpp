@@ -15,11 +15,16 @@ private:
     string private_data = "private data";
 protected:
     string protected_data = "protected data";
+    string someother = "someother data";
 public:
     string public_data = "public data";
 };
 
 class N : public M {
+    public :
+    void print_someother(){
+        cout << someother << endl;
+    }
 };
 
 int main(){
@@ -29,6 +34,7 @@ int main(){
     N n;
     n.print_protected();
     n.print_modified_protected("->n_instance");
+    n.print_someother();
 
     N o;
     o.print_protected();

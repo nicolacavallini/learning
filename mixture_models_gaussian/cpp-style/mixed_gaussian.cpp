@@ -79,18 +79,6 @@ vector<data_t>get_data_means_var(
     return ret;
 }
 
-
-data_t* get_data_means_var(data_t* data, int samples_per_component, int num_components) {
-    data_t* ret = new data_t[2*num_components];
-
-    for(int i=0;i<2*num_components;i+=2) {
-        ret[i] = 640*i/(2.0f*num_components) + 120;
-        ret[i+1] = 1000;
-    }
-
-    return ret;
-}
-
 data_t calculate_1d_probability(
         const data_t value,
         const data_t mean,
@@ -177,12 +165,12 @@ void run_gaussian_mixture_1d() {
 
     //vector<data_t> data(num_components*samples_per_component);
 
-    vector<data_t> mean = {120, 480, 240, 360, 320};//{120, 480};//
-    vector<data_t> std = {20, 30, 10, 40, 5};//{20, 30};//
+    vector<data_t> mean = {120, 480};//{120, 480, 240, 360, 320};//
+    vector<data_t> std = {20, 30};//{20, 30, 10, 40, 5};//
     int num_components = mean.size();
 
 
-    const int samples_per_component = 100;
+    const int samples_per_component = 60;
     vector<data_t> data;
 
     for(int i=0; i<mean.size();i++){
@@ -219,6 +207,8 @@ void run_gaussian_mixture_1d() {
         pi[i] = 1.0/num_components;
     }
 
+
+
     for(int iter=0;iter<101;iter++) {
         // E step
         for(int i=0;i<num_samples;i++) {
@@ -238,12 +228,6 @@ void run_gaussian_mixture_1d() {
             }
         }
 
-        //cout << responsibility.size() << endl;
-        //cout << responsibility[0].size() << endl;
-
-        //print_vec_vec(responsibility);
-
-        // M step
         vector<data_t> nc(num_components);
 
         for(int i=0;i<num_samples;i++) {

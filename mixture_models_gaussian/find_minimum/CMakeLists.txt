@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.8)
+project( MixedGaussian )
+SET (CMAKE_CXX_FLAGS "-std=gnu++11 ${CMAKE_CXX_FLAGS}")
+add_executable( mixed_gaussian main.cpp )
+target_link_libraries( mixed_gaussian ${OpenCV_LIBS} )

@@ -376,6 +376,14 @@ int main(){
     bspdegelev(degree,control_points,dim,n_control_points,
                knots,n_knots,degree_elevation,&nh,inc,ink);
 
+    printf("nh = %d\n", nh);
+
+    printf("inc = \n");
+    print_vec(inc,(degree_elevation+1)*dim*n_control_points);
+
+    printf("ink = \n");
+    print_vec(ink,(degree_elevation+1)*n_knots);
+
 
 
 

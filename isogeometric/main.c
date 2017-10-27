@@ -334,18 +334,56 @@ double * allocate_vec_double(int size){
 
 int main(){
     int degree = 1;
-    int n_knots = 2;
-    int i;
+    int n_knots = 4;
 
-    double * k  = allocate_vec_double(n_knots);
+    double * knots  = allocate_vec_double(n_knots);
 
-    k[0] = 0;
-    k[1] = 1;
 
-    print_vec(k,n_knots);
+    knots[0] = 0;
+    knots[1] = 0;
+    knots[2] = 1;
+    knots[3] = 1;
+
+    print_vec(knots,n_knots);
+    printf("...allocated knot vector.\n");
+
+    int dim = 3;
+    int n_control_points = 2;
+
+    double * control_points  = allocate_vec_double(
+        dim*n_control_points);
+
+
+    control_points[0] = 0;
+    control_points[1] = 0;
+    control_points[2] = 0;
+    control_points[3] = 1;
+    control_points[4] = 0;
+    control_points[5] = 0;
+
+    print_vec(control_points,dim*n_control_points);
+
+    printf("...allocated control points.\n");
+
+    int degree_elevation = 1;
+
+    int nh; // output
+    /* allocate work space t times larger than original number */
+    /* of control points and knots */
+    double * inc = allocate_vec_double((degree_elevation+1)*dim*n_control_points);
+    double * ink = allocate_vec_double((degree_elevation+1)*n_knots);
+
+    bspdegelev(degree,control_points,dim,n_control_points,
+               knots,n_knots,degree_elevation,&nh,inc,ink);
+
+
+
 
 
     printf("...done.\n");
-    free(k);
+    free(knots);
+    free(control_points);
+    free(inc);
+    free(ink);
     return 0;
 }

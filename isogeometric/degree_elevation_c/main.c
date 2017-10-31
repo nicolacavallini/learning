@@ -89,6 +89,17 @@ double bincoeff(int n, int k)
   return floor(0.5+exp(factln(n)-factln(k)-factln(n-k)));
 }
 
+void print_matrix(double **m, int rows, int cols){
+    int i = 0;
+    int j = 0;
+    for (i =0; i < rows; i++){
+        for (j =0; j < cols; j++){
+            printf("%e, ",m[j][i]);
+        }
+        printf("\n");
+    }
+}
+
 /* Degree elevate a B-Spline t times. */
 /* i.e. from d to d+t */
 
@@ -118,6 +129,9 @@ int bspdegelev(int d, double *c, int mc, int nc, double *k, int nk,
 
   n = nc - 1;
 
+  printf("nc = %d\n", nc);
+  printf("mc = %d\n", mc);
+
   bezalfs = matrix(d+1,d+t+1);
   bpts = matrix(mc,d+1);
   ebpts = matrix(mc,d+t+1);
@@ -128,16 +142,25 @@ int bspdegelev(int d, double *c, int mc, int nc, double *k, int nk,
   ph = d + t;
   ph2 = ph / 2;
 
+  printf("m = %d\n",m);
+  printf("ph = %d\n",ph);
+  printf("ph2 = %d\n",ph2);
+
   /* compute bezier degree elevation coefficients   */
   bezalfs[0][0] = bezalfs[ph][d] = 1.0;
+  //bezalfs[0][0] = bezalfs[d][ph] = 1.0;
+  //printf("bezalfs = \n");
+  //print_matrix(bezalfs,d+1,d+t+1);
 
   for (i = 1; i <= ph2; i++)
   {
     inv = 1.0 / bincoeff(ph,i);
     mpi = min(d,i);
 
-    for (j = max(0,i-t); j <= mpi; j++)
+    for (j = max(0,i-t); j <= mpi; j++){
+        printf("(%d, %d) = %e\n",i,j, inv * bincoeff(d,j) * bincoeff(t,i-j));
       bezalfs[i][j] = inv * bincoeff(d,j) * bincoeff(t,i-j);
+  }
   }
 
   for (i = ph2+1; i <= ph-1; i++)
@@ -146,6 +169,8 @@ int bspdegelev(int d, double *c, int mc, int nc, double *k, int nk,
     for (j = max(0,i-t); j <= mpi; j++)
       bezalfs[i][j] = bezalfs[ph-i][d-j];
   }
+  // printf("bezalfs = \n");
+  // print_matrix(bezalfs,d+1,d+t+1);
 
   mh = ph;
   kind = ph+1;
@@ -240,7 +265,7 @@ int bspdegelev(int d, double *c, int mc, int nc, double *k, int nk,
         while (j - i > tr)
         {
           /* loop and compute the new control points */
-	     /* for one removal step    */
+      /* for one removal step    */
           if (i < cind)
           {
             alf = (ub-ik[i])/(ua-ik[i]);
@@ -321,6 +346,7 @@ int bspdegelev(int d, double *c, int mc, int nc, double *k, int nk,
   return(ierr);
 }
 
+
 void print_vec(double *v, int size){
     int i;
     for (i = 0; i < size; i ++)
@@ -329,10 +355,104 @@ void print_vec(double *v, int size){
 }
 
 double * allocate_vec_double(int size){
-    return (double*)malloc(size*sizeof(double));
+    double * v = (double*)malloc(size*sizeof(double));
+    int i = 0;
+    for (i = 0; i< size; i++)
+        v[i] = 0;
+
+    return v;
 }
 
-int main(){
+int findspan(int n, int p, double u, double *U)
+{
+  int low, high, mid;
+
+  /* special case */
+  if (u == U[n+1]) return(n);
+
+  /* do binary search */
+  low = p;
+  high = n + 1;
+  mid = (low + high) / 2;
+  while (u < U[mid] || u >= U[mid+1])
+  {
+    if (u < U[mid])
+      high = mid;
+    else
+      low = mid;
+    mid = (low + high) / 2;
+  }
+
+  return(mid);
+}
+
+int bspkntins(int d, double *c, int mc, int nc, double *k, int nk,
+              double *u, int nu, double *ic, double *ik)
+{
+  int ierr = 0;
+  int a, b, r, l, i, j, m, n, s, q, ind;
+  double alfa;
+
+  double **ctrl  = vec2mat(c, mc, nc);
+  double **ictrl = vec2mat(ic, mc, nc+nu);
+
+  n = nc - 1;
+  r = nu - 1;
+
+  m = n + d + 1;
+  a = findspan(n, d, u[0], k);
+  b = findspan(n, d, u[r], k);
+  ++b;
+
+  for (q = 0; q < mc; q++)
+  {
+    for (j = 0; j <= a-d; j++) ictrl[j][q] = ctrl[j][q];
+    for (j = b-1; j <= n; j++) ictrl[j+r+1][q] = ctrl[j][q];
+  }
+  for (j = 0; j <= a; j++)   ik[j] = k[j];
+  for (j = b+d; j <= m; j++) ik[j+r+1] = k[j];
+
+  i = b + d - 1;
+  s = b + d + r;
+  for (j = r; j >= 0; j--)
+  {
+    while (u[j] <= k[i] && i > a)
+    {
+      for (q = 0; q < mc; q++)
+        ictrl[s-d-1][q] = ctrl[i-d-1][q];
+      ik[s] = k[i];
+      --s;
+      --i;
+    }
+    for (q = 0; q < mc; q++)
+      ictrl[s-d-1][q] = ictrl[s-d][q];
+    for (l = 1; l <= d; l++)
+    {
+      ind = s - d + l;
+      alfa = ik[s+l] - u[j];
+      if (fabs(alfa) == 0.0)
+        for (q = 0; q < mc; q++)
+          ictrl[ind-1][q] = ictrl[ind][q];
+      else
+      {
+        alfa /= (ik[s+l] - k[i-d+l]);
+        for (q = 0; q < mc; q++)
+          ictrl[ind-1][q] = alfa*ictrl[ind-1][q]+(1.0-alfa)*ictrl[ind][q];
+      }
+    }
+
+    ik[s] = u[j];
+    --s;
+  }
+
+  freevec2mat(ctrl);
+  freevec2mat(ictrl);
+
+  return ierr;
+}
+
+void test_degree_elevation(){
+
     int degree = 1;
     int n_knots = 4;
 
@@ -367,31 +487,109 @@ int main(){
 
     int degree_elevation = 1;
 
-    int nh; // output
+    int nh = 0; // output
     /* allocate work space t times larger than original number */
     /* of control points and knots */
     double * inc = allocate_vec_double((degree_elevation+1)*dim*n_control_points);
     double * ink = allocate_vec_double((degree_elevation+1)*n_knots);
 
-    bspdegelev(degree,control_points,dim,n_control_points,
-               knots,n_knots,degree_elevation,&nh,inc,ink);
+     bspdegelev(degree,control_points,dim,n_control_points,
+                knots,n_knots,degree_elevation,&nh,inc,ink);
 
     printf("nh = %d\n", nh);
-
+    //
     printf("inc = \n");
     print_vec(inc,(degree_elevation+1)*dim*n_control_points);
 
     printf("ink = \n");
     print_vec(ink,(degree_elevation+1)*n_knots);
 
-
-
-
-
     printf("...done.\n");
     free(knots);
     free(control_points);
     free(inc);
     free(ink);
+
+}
+
+void test_knot_insertion(){
+
+    int degree = 1;
+    int n_knots = 4;
+
+    double * knots  = allocate_vec_double(n_knots);
+
+
+    knots[0] = 0;
+    knots[1] = 0;
+    knots[2] = 1;
+    knots[3] = 1;
+
+    print_vec(knots,n_knots);
+    printf("...allocated knot vector.\n");
+
+    int dim = 3;
+    int n_control_points = 2;
+
+    double * control_points  = allocate_vec_double(
+        dim*n_control_points);
+
+
+    control_points[0] = 0;
+    control_points[1] = 0;
+    control_points[2] = 0;
+    control_points[3] = 1;
+    control_points[4] = 0;
+    control_points[5] = 0;
+
+    print_vec(control_points,dim*n_control_points);
+
+    printf("...allocated control points.\n");
+
+    int n_new_k = 2;
+
+    double * u = allocate_vec_double(n_new_k);
+
+    u [0] = .25;
+    u [1] = .5;
+
+    print_vec(u,n_new_k);
+    printf("...allocated new knots.\n");
+
+
+
+    /* allocate work space t times larger than original number */
+    /* of control points and knots */
+    double * inc = allocate_vec_double(dim*(n_control_points+n_new_k));
+    double * ink = allocate_vec_double(n_knots+n_new_k);
+
+    int ier = bspkntins(degree, control_points, dim, n_control_points,
+        knots,n_knots,u,n_new_k,inc,ink);
+
+    //  bspdegelev(degree,control_points,dim,n_control_points,
+    //             knots,n_knots,degree_elevation,&nh,inc,ink);
+    //
+    // printf("nh = %d\n", nh);
+    // //
+    printf("inc = \n");
+    print_vec(inc,dim*(n_control_points+n_new_k));
+
+    printf("ink = \n");
+    print_vec(ink,n_knots+n_new_k);
+    //
+    // printf("...done.\n");
+    free(knots);
+    free(control_points);
+    free(u);
+    free(inc);
+    free(ink);
+
+}
+
+int main(){
+
+    test_degree_elevation();
+    test_knot_insertion();
+
     return 0;
 }

@@ -19,7 +19,14 @@ int main(){
 
     cout << "vv.capacity() = " << vv.capacity() << endl;
 
-
+    vector<double> w = {1,2,3}; 
+    cout << "w.size() = " << w.size() << endl;
+    w.clear();
+    cout << "w.size() = " << w.size() << endl;
+    w.resize(3);
+    cout << "w.size() = " << w.size() << endl;
+    //w.erase();
+    //cout << "w.size() = " << w.size() << endl;
 
     return 0;
 }

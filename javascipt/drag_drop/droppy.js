@@ -117,7 +117,7 @@
             const reader = entry.createReader();
             reader.readEntries(
                 function(results) {
-                    has_subdir_resolve();
+                    has_subdir_resolve(entry.fullPath);
                     //console.log('directory content',results);
 
                     for (let f of results) {

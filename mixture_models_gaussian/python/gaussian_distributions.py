@@ -13,16 +13,20 @@ def get_normal_distribution_prime_prime(m,s):
 
 def newtons_method(residuo,tangente,ic):
     x0 = ic
-    samples = []
+    #samples = []
+    print("newtons_method")
+    converged = True
     for i in range(40):
-        samples.append(x0)
+        #samples.append(x0)
 
         x = x0 -residuo(x0)/tangente(x0)
         print("residuo = "+str(residuo(x))+", tangente = "+str(tangente(x))+", x = "+str(x))
         x0 = x
         if np.sqrt(residuo(x)*residuo(x)) < 1e-12:
             break
-    return x
+        if i == 39:
+            conveged = False
+    return x,converged
 
 
 class NormalDistributionDensity:
@@ -35,38 +39,53 @@ class NormalDistributionDensity:
         self.x_max = np.max(sample)
 
         self.length = (np.amax(sample) - np.amin(sample))
-    def find_local_maxima(self,number_of_expected_maxima,number_of_initial_guesses):
+        self.initial_values_array = np.sort(sample)
 
-        x = np.linspace(self.x_min - .1*self.length,
-                        self.x_max + .1*self.length,number_of_initial_guesses)
+    def find_local_maxima(self):
 
-        values = self.function(x)
+        values = self.initial_values_array
+        #print(values)
+
+        # plt.plot(values,self.function(values))
+        # plt.show()
 
 
         maxima = np.array([np.nan])
-        while maxima.shape[0] < number_of_expected_maxima:
 
-            if values.shape[0] == 0:
-                break
+        #print ("find local maxima")
 
-            initial_guess = x[np.argmax(values)]
-            values = np.delete(values,np.argmax(values))
+        # while maxima.shape[0] < number_of_expected_maxima:
+        #
+        #     if values.shape[0] == 0:
+        #         break
+        for initial_guess in values:
 
-            z_local_max = newtons_method(self.prime,self.prime_prime,initial_guess)
+            #initial_guess = np.amax(values)
+            #values = np.delete(values,np.argmax(values))
+
+            #print("callin newton")
+
+            (z_local_max,converged) = newtons_method(self.prime,self.prime_prime,initial_guess)
 
             concavity = self.prime_prime(z_local_max)
 
             first_maximum_fuond = np.isnan(maxima)[0] and concavity < 0
-            distinct_maxima = np.abs(z_local_max - maxima[-1]) > 1e-10
+            distance = np.amin(np.abs(z_local_max - maxima))
+            # print("distance")
+            # print(distance)
+            distinct_maxima = distance > 1e-4
 
             other_maxima_fuond = (distinct_maxima and concavity < 0) and np.isfinite(maxima)[0]
-            if first_maximum_fuond:
+            if first_maximum_fuond and converged:
                 maxima = np.array([z_local_max])
-            if other_maxima_fuond:
+            if other_maxima_fuond and converged:
                 maxima = np.concatenate((maxima,[z_local_max]))
 
-        # plt.plot(x,density(x))
-        # plt.plot(maxima,density(maxima),'ob')
+        # print ("sample = ")
+        #
+        #
+        # plt.plot(self.initial_values_array,self.function(self.initial_values_array))
+        # plt.plot(maxima,self.function(maxima),'ob')
         # plt.show()
         return maxima
 
@@ -113,9 +132,11 @@ def numeric_test():
 
 
 def test_find_distribution_maxima():
-    m0, s0 = .0, .1
-    m1, s1 = .5, .1
-
+    # m0, s0 = .0, .1
+    # m1, s1 = .5, .1
+    #
+    # mean = np.array([.0,.5,1.,1.5])
+    # std = np.array([.1,.1,.2,.3])
     mean = np.array([.0,.5])
     std = np.array([.1,.1])
 
@@ -124,8 +145,14 @@ def test_find_distribution_maxima():
     for m,s in zip(mean,std):
         sample = np.concatenate((sample,np.random.normal(m, s, 10)))
 
+    # sample = np.array([-0.16605256, -0.08234523, -0.07784348, -0.05126223, -0.03256486, -0.0254929,
+    #            0.04550798,  0.06374608,  0.09201521,  0.16436776,  0.36558611,  0.40515812,
+    #            0.41961414,  0.4802385,   0.52568758,  0.53704676,  0.53995192,  0.56715757,
+    #            0.57914078,  0.65041879])
+
+
     ndd = NormalDistributionDensity(sample,.1)
-    maxima = ndd.find_local_maxima(2,19)
+    maxima = ndd.find_local_maxima()
     print(maxima)
 
     length = (np.amax(sample) - np.amin(sample))

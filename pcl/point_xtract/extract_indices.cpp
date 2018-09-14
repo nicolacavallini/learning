@@ -32,8 +32,31 @@ bool segment_planar_component(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_fi
       return false;
 }
 
-void remove_inliers_from_cloud(const pcl::PointIndices::Ptr inliers,
-                               pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered){
+void remove_inliers_from_cloud(const pcl::PointIndices::Ptr &inliers,
+                               pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_filtered,
+                               pcl::ExtractIndices<pcl::PointXYZ> &extract){
+
+
+
+    // Extract the inliers
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_p (new pcl::PointCloud<pcl::PointXYZ>);
+    extract.setInputCloud (cloud_filtered);
+    extract.setIndices (inliers);
+    extract.setNegative (false);
+    extract.filter (*cloud_p);
+    std::cerr << "PointCloud representing the planar component: " 
+              << cloud_p->width * cloud_p->height 
+              << " data points." << std::endl;
+
+    //std::stringstream ss;
+    //ss << "table_scene_lms400_plane_" << i << ".pcd";
+    //writer.write<pcl::PointXYZ> (ss.str (), *cloud_p, false);
+
+    // Create the filtering object
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_f (new pcl::PointCloud<pcl::PointXYZ>);
+    extract.setNegative (true);
+    extract.filter (*cloud_f);
+    cloud_filtered.swap (cloud_f);
 
 }
 
@@ -67,12 +90,11 @@ main (int argc, char** argv)
 
 
 
-
-  // Create the filtering object
-  pcl::ExtractIndices<pcl::PointXYZ> extract;
-
   int i = 0, nr_points = (int) cloud_filtered->points.size ();
   // While 30% of the original cloud is still there
+
+    // Create the filtering object
+  pcl::ExtractIndices<pcl::PointXYZ> extract;
 
   while (cloud_filtered->points.size () > 0.3 * nr_points)
   {    
@@ -84,23 +106,10 @@ main (int argc, char** argv)
     if (segment_planar_component(cloud_filtered,inliers,coefficients)) 
       std::cerr << "Could not estimate a planar model for the given dataset." << std::endl;
 
-    // Extract the inliers
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_p (new pcl::PointCloud<pcl::PointXYZ>);
-    extract.setInputCloud (cloud_filtered);
-    extract.setIndices (inliers);
-    extract.setNegative (false);
-    extract.filter (*cloud_p);
-    std::cerr << "PointCloud representing the planar component: " << cloud_p->width * cloud_p->height << " data points." << std::endl;
+    
+    remove_inliers_from_cloud(inliers,cloud_filtered,extract);
 
-    std::stringstream ss;
-    ss << "table_scene_lms400_plane_" << i << ".pcd";
-    writer.write<pcl::PointXYZ> (ss.str (), *cloud_p, false);
 
-    // Create the filtering object
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_f (new pcl::PointCloud<pcl::PointXYZ>);
-    extract.setNegative (true);
-    extract.filter (*cloud_f);
-    cloud_filtered.swap (cloud_f);
     i++;
   }
 

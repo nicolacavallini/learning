@@ -33,10 +33,10 @@ bool segment_planar_component(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_fi
 }
 
 void remove_inliers_from_cloud(const pcl::PointIndices::Ptr &inliers,
-                               pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_filtered,
-                               pcl::ExtractIndices<pcl::PointXYZ> &extract){
+                               pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_filtered){
 
-
+    // Create the filtering object
+    pcl::ExtractIndices<pcl::PointXYZ> extract;
 
     // Extract the inliers
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_p (new pcl::PointCloud<pcl::PointXYZ>);
@@ -93,8 +93,7 @@ main (int argc, char** argv)
   int i = 0, nr_points = (int) cloud_filtered->points.size ();
   // While 30% of the original cloud is still there
 
-    // Create the filtering object
-  pcl::ExtractIndices<pcl::PointXYZ> extract;
+
 
   while (cloud_filtered->points.size () > 0.3 * nr_points)
   {    
@@ -107,7 +106,7 @@ main (int argc, char** argv)
       std::cerr << "Could not estimate a planar model for the given dataset." << std::endl;
 
     
-    remove_inliers_from_cloud(inliers,cloud_filtered,extract);
+    remove_inliers_from_cloud(inliers,cloud_filtered);
 
 
     i++;

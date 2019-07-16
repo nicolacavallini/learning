@@ -43,7 +43,7 @@ T::T() {}
 std::shared_ptr<T> T::create(std::unique_ptr<TD> &in){//
 
   std::shared_ptr<T> tag(new T(in));
-  //std::shared_ptr<T> tag = std::make_shared<T>(in);
+  //std::shared_ptr<T> tag = std::make_shared<T>(in); needs a public constructor
   //tag->setExt(in);
 
   return tag;
